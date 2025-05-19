@@ -1,0 +1,16 @@
+{
+  "name": "ai-feed-manager",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "cd project && npm run dev",
+    "dev:proxy": "cd project && npm run dev:proxy",
+    "build": "cd project && npm run build",
+    "lint": "cd project && npm run lint",
+    "preview": "cd project && npm run preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  }
+}
