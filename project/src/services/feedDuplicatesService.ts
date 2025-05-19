@@ -227,6 +227,8 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
   // Создаем новый список продуктов
   const mergedProducts: Product[] = [];
   const processedUrls = new Set<string>();
+  // Карта: исходный id -> id мастер-товара
+  const mergedIdMap: Record<string, string> = {};
   
   // Добавляем объединенные товары
   productGroups.forEach(group => {
@@ -385,7 +387,11 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
       masterProduct.mergedSizes = sizeValues;
     }
     
-    // Добавляем мастер-товар в итоговый список
+    // Сохраняем соответствие id всех вариантов -> id мастер-товара
+    variants.forEach(v => {
+      mergedIdMap[v.id] = masterProduct.id;
+    });
+    
     mergedProducts.push(masterProduct);
   });
   
@@ -401,6 +407,10 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
   return {
     ...feed,
     products: mergedProducts,
-    dateModified: new Date().toISOString() // Обновляем только дату изменения
+    dateModified: new Date().toISOString(),
+    metadata: {
+      ...feed.metadata,
+      mergedIdMap // сохраняем карту объединённых id
+    }
   };
 } 

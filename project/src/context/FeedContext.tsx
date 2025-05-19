@@ -234,12 +234,13 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       if (sourceUrl) {
         parsedFeed.metadata.url = sourceUrl;
       }
-      const exists = feeds.some(f => f.id === parsedFeed.id);
-      if (exists) {
-        updateFeed(parsedFeed.id, parsedFeed);
-      } else {
-        addFeed(parsedFeed);
-      }
+      // Не обновляем и не добавляем фид автоматически!
+      // const exists = feeds.some(f => f.id === parsedFeed.id);
+      // if (exists) {
+      //   updateFeed(parsedFeed.id, parsedFeed);
+      // } else {
+      //   addFeed(parsedFeed);
+      // }
       return parsedFeed;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse XML feed');
@@ -257,12 +258,13 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       if (sourceUrl) {
         parsedFeed.metadata.url = sourceUrl;
       }
-      const exists = feeds.some(f => f.id === parsedFeed.id);
-      if (exists) {
-        updateFeed(parsedFeed.id, parsedFeed);
-      } else {
-        addFeed(parsedFeed);
-      }
+      // Не обновляем и не добавляем фид автоматически!
+      // const exists = feeds.some(f => f.id === parsedFeed.id);
+      // if (exists) {
+      //   updateFeed(parsedFeed.id, parsedFeed);
+      // } else {
+      //   addFeed(parsedFeed);
+      // }
       return parsedFeed;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse large XML feed');

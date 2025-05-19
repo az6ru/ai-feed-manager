@@ -47,6 +47,7 @@ export interface FeedMetadata {
   company: string;
   url: string;
   date: string;
+  mergedIdMap?: Record<string, string>; // карта объединённых id
 }
 
 export interface Feed {

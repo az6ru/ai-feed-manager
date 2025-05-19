@@ -6,9 +6,15 @@ interface AIBulkGenerationProps {
   feed: Feed;
   onComplete: (updatedFeed: Feed, results: AIGenerationResult[]) => void;
   onCancel: () => void;
+  selectedProductIds?: string[];
 }
 
-export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComplete, onCancel }) => {
+export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComplete, onCancel, selectedProductIds }) => {
+  // Выбираем только нужные товары
+  const productsToGenerate = selectedProductIds && selectedProductIds.length > 0
+    ? feed.products.filter(p => selectedProductIds.includes(p.id))
+    : feed.products;
+
   const [options, setOptions] = useState({
     generateNames: true,
     generateDescriptions: true,
@@ -17,7 +23,7 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [totalItems, setTotalItems] = useState(feed.products.length);
+  const [totalItems, setTotalItems] = useState(productsToGenerate.length);
   const [results, setResults] = useState<AIGenerationResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{title?: string, description?: string} | null>(null);
@@ -35,7 +41,7 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
   
   // Запуск тестовой генерации для проверки настроек
   const runTestGeneration = async () => {
-    if (!feed.products || feed.products.length === 0) {
+    if (!productsToGenerate || productsToGenerate.length === 0) {
       setError('Нет товаров для тестирования');
       return;
     }
@@ -46,7 +52,7 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
     
     try {
       // Берем первый товар для теста
-      const testProduct = feed.products[0];
+      const testProduct = productsToGenerate[0];
       
       // Создаем копию фида для теста
       const feedWithSettings = { ...feed };
@@ -124,14 +130,14 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
   
   // Запуск генерации
   const startGeneration = async () => {
-    if (!feed.products || feed.products.length === 0) {
+    if (!productsToGenerate || productsToGenerate.length === 0) {
       setError('Нет товаров для генерации');
       return;
     }
     
     setIsGenerating(true);
     setProgress(0);
-    setTotalItems(feed.products.length);
+    setTotalItems(productsToGenerate.length);
     setError(null);
     
     try {
@@ -143,8 +149,8 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
       
       console.log('Начало генерации с настройками фида:', feed.aiSettings);
       
-      // Создаем копию фида для гарантии, что настройки будут переданы
-      const feedWithSettings = { ...feed };
+      // Создаем копию фида, но только с выбранными товарами
+      const feedWithSettings = { ...feed, products: productsToGenerate };
       
       // Проверяем наличие настроек фида
       if (!feedWithSettings.aiSettings) {
@@ -179,7 +185,7 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
       setResults(generationResults);
       
       // Применяем результаты к фиду
-      const updatedFeed = aiService.applyGenerationResults(feedWithSettings, generationResults);
+      const updatedFeed = aiService.applyGenerationResults(feedWithSettings, generationResults, true);
       
       // Вызываем обработчик завершения
       onComplete(updatedFeed, generationResults);
@@ -203,7 +209,7 @@ export const AIBulkGeneration: React.FC<AIBulkGenerationProps> = ({ feed, onComp
   
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Массовая генерация для {feed.products.length} товаров</h2>
+      <h2 className="text-xl font-semibold mb-4">Массовая генерация для {productsToGenerate.length} товаров</h2>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">

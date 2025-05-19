@@ -202,110 +202,94 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   };
   
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Настройки ИИ для фида "{feed.name}"</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
-          <h3 className="text-md font-medium text-gray-800 mb-3">Промпты для товаров</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Эти промпты используются для генерации названий и описаний отдельных товаров
-          </p>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Промпт для названий
-            </label>
-            <textarea
-              name="namePrompt"
-              value={settings.namePrompt}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Введите промпт с плейсхолдером {{товар}}"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Используйте {"{{товар}}"} как плейсхолдер для данных о товаре
-            </p>
+    <div className="bg-white shadow rounded-xl p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <span className="inline-block bg-blue-100 text-blue-600 rounded-full p-2 mr-2">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </span>
+        Настройки AI для фида «{feed.name}»
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Промпты для товаров */}
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-lg font-semibold text-gray-900">Промпты для товаров</span>
           </div>
-          
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Промпт для описаний
-            </label>
-            <textarea
-              name="descriptionPrompt"
-              value={settings.descriptionPrompt}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Введите промпт с плейсхолдером {{товар}}"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Используйте {"{{товар}}"} как плейсхолдер для данных о товаре
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Промпт для названий</label>
+              <textarea
+                name="namePrompt"
+                value={settings.namePrompt}
+                onChange={handleChange}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                placeholder="Введите промпт с плейсхолдером {{товар}}"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Промпт для описаний</label>
+              <textarea
+                name="descriptionPrompt"
+                value={settings.descriptionPrompt}
+                onChange={handleChange}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                placeholder="Введите промпт с плейсхолдером {{товар}}"
+              />
+            </div>
           </div>
-          
-          <div className="mt-3">
+          <div className="flex items-center gap-2 mt-4">
             <button
               type="button"
               onClick={generateExample}
-              className="px-3 py-1 text-sm border rounded-md bg-green-50 text-green-700 border-green-300 hover:bg-green-100 flex items-center gap-1"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 4.5L22 8L18 11.5"></path>
-                <path d="M6 19.5L2 16L6 12.5"></path>
-                <path d="M22 8H17.5C13.5 8 10.5 16 6.5 16H2"></path>
-              </svg>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M18 4.5L22 8L18 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 19.5L2 16L6 12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M22 8H17.5C13.5 8 10.5 16 6.5 16H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Тестировать на товаре
             </button>
+            <button
+              type="button"
+              onClick={resetToGlobal}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition border border-gray-200"
+            >
+              Сбросить к глобальным
+            </button>
           </div>
-          
-          {/* Блок отображения результатов тестирования */}
+          {/* Блок тестирования */}
           {(testResults.generatedName || testResults.generatedDescription || testResults.error || testResults.isLoading) && (
-            <div className="mt-4 border rounded-md bg-white">
-              <div className="bg-blue-50 p-3 border-b border-blue-100 flex justify-between items-center">
-                <h4 className="text-sm font-medium text-blue-800">
+            <div className="mt-4 border rounded-lg bg-gray-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-blue-700 flex items-center gap-1">
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   Результаты тестирования
-                </h4>
-                <button 
-                  type="button" 
-                  onClick={closeTestResults}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
+                </span>
+                <button type="button" onClick={closeTestResults} className="text-gray-400 hover:text-gray-700 p-1 rounded">
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/></svg>
                 </button>
               </div>
-              
-              <div className="p-3">
+              <div>
                 {testResults.isLoading ? (
-                  <div className="flex items-center justify-center p-4">
-                    <svg className="animate-spin h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Генерация примера...</span>
+                  <div className="flex items-center gap-2 text-blue-500">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Генерация примера...
                   </div>
                 ) : testResults.error ? (
-                  <div className="text-red-600 p-2 text-sm">
+                  <div className="text-red-600 p-2 text-sm flex items-center gap-2">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     Ошибка: {testResults.error}
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="text-sm text-gray-500">
-                      Пример генерации для товара "{testResults.productName}":
+                  <div className="space-y-2">
+                    <div className="text-xs text-gray-500">
+                      Пример для товара: <span className="font-semibold text-gray-700">{testResults.productName}</span>
                     </div>
-                    
-                    <div className="border-l-4 border-green-300 pl-3 py-1">
-                      <div className="text-sm font-medium text-gray-700 mb-1">Сгенерированное название:</div>
+                    <div className="bg-white rounded p-2 border-l-4 border-green-300">
+                      <div className="text-xs font-medium text-gray-700 mb-1">Сгенерированное название:</div>
                       <div className="text-sm pl-2">{testResults.generatedName}</div>
                     </div>
-                    
-                    <div className="border-l-4 border-blue-300 pl-3 py-1">
-                      <div className="text-sm font-medium text-gray-700 mb-1">Сгенерированное описание:</div>
+                    <div className="bg-white rounded p-2 border-l-4 border-blue-300">
+                      <div className="text-xs font-medium text-gray-700 mb-1">Сгенерированное описание:</div>
                       <div className="text-sm pl-2">{testResults.generatedDescription}</div>
                     </div>
                   </div>
@@ -313,96 +297,75 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
               </div>
             </div>
           )}
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
-          <h3 className="text-md font-medium text-gray-800 mb-3">Общие настройки</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Общие параметры для всех генераций AI
-          </p>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Язык
-            </label>
-            <select
-              name="language"
-              value={settings.language}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="ru">Русский</option>
-              <option value="en">English</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-              <option value="es">Español</option>
-              <option value="it">Italiano</option>
-            </select>
+        </section>
+        {/* Общие настройки */}
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-lg font-semibold text-gray-900">Общие настройки</span>
           </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Тон
-            </label>
-            <select
-              name="tone"
-              value={settings.tone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="профессиональный">Профессиональный</option>
-              <option value="casual">Повседневный</option>
-              <option value="friendly">Дружелюбный</option>
-              <option value="enthusiastic">Восторженный</option>
-              <option value="informative">Информативный</option>
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Язык</label>
+              <select
+                name="language"
+                value={settings.language}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+              >
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="es">Español</option>
+                <option value="it">Italiano</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Тон</label>
+              <select
+                name="tone"
+                value={settings.tone}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+              >
+                <option value="профессиональный">Профессиональный</option>
+                <option value="casual">Повседневный</option>
+                <option value="friendly">Дружелюбный</option>
+                <option value="enthusiastic">Восторженный</option>
+                <option value="informative">Информативный</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Максимум токенов</label>
+              <input
+                type="number"
+                name="maxTokens"
+                value={settings.maxTokens}
+                onChange={handleChange}
+                min={10}
+                max={4000}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+              />
+            </div>
           </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Максимальное количество токенов
-            </label>
-            <input
-              type="number"
-              name="maxTokens"
-              value={settings.maxTokens}
-              onChange={handleChange}
-              min={10}
-              max={4000}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-        </div>
-        
-        <div className="mt-6 flex justify-between">
-          <div>
+        </section>
+        {/* Кнопки */}
+        <div className="flex justify-end gap-3 pt-6">
+          {onCancel && (
             <button
               type="button"
-              onClick={resetToGlobal}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={onCancel}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
             >
-              Сбросить к глобальным
+              Отмена
             </button>
-          </div>
-          
-          <div>
-            {onCancel && (
-              <button
-                type="button"
-                onClick={onCancel}
-                className="mr-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Отмена
-              </button>
-            )}
-            
-            <button
-              type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Сохранить
-            </button>
-          </div>
+          )}
+          <button
+            type="submit"
+            className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition"
+          >
+            Сохранить
+          </button>
         </div>
       </form>
     </div>

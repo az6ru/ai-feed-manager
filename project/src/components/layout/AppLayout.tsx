@@ -105,19 +105,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         </div>
       </header>
 
-      {/* Заголовок страницы */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-medium text-gray-900">
-            {pathname === '/' && 'Dashboard'}
-            {pathname === '/import' && 'Import Feed'}
-            {pathname === '/settings' && 'Settings'}
-            {pathname.startsWith('/feeds/') && pathname.includes('/products/') && 'Product Editor'}
-            {pathname.startsWith('/feeds/') && !pathname.includes('/products/') && 'Feed Editor'}
-          </h1>
-        </div>
-      </div>
-
       {/* Основной контент */}
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="container mx-auto px-4 py-4">

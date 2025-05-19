@@ -59,31 +59,41 @@ interface ProductDiff {
   oldProduct?: Product;
   newProduct: Product;
 }
-function diffProducts(oldProducts: Product[], newProducts: Product[]): ProductDiff[] {
+function diffProducts(
+  oldProducts: Product[],
+  newProducts: Product[],
+  options?: UpdateOptions,
+  mergedIdMap?: Record<string, string>
+): ProductDiff[] {
   const oldMap: Record<string, Product> = Object.fromEntries(oldProducts.map((p) => [p.id, p]));
   const newMap: Record<string, Product> = Object.fromEntries(newProducts.map((p) => [p.id, p]));
   const diffs: ProductDiff[] = [];
-  // Изменённые и новые
+  const opts = options || defaultUpdateOptions;
+
+  // Новые товары
   for (const id in newMap) {
-    const oldP = oldMap[id];
-    const newP = newMap[id];
-    if (!oldP) {
-      diffs.push({ id, type: 'new', newProduct: newP });
+    // Если игнорируем объединённые id и id есть в mergedIdMap — не считаем новым
+    if (opts.ignoreMerged && mergedIdMap && mergedIdMap[id]) continue;
+    if (!oldMap[id]) {
+      if (opts.addNew) {
+        diffs.push({ id, type: 'new', newProduct: newMap[id] });
+      }
       continue;
     }
+    const oldP = oldMap[id];
+    const newP = newMap[id];
     const changedFields: Record<string, { old: any; new: any }> = {};
-    for (const key of ['name','description','price','oldPrice','currency','categoryId','url','vendor','vendorCode','available']) {
-      if (oldP[key as keyof Product] !== newP[key as keyof Product]) {
-        changedFields[key] = { old: oldP[key as keyof Product], new: newP[key as keyof Product] };
+    if (opts.price && oldP.price !== newP.price) changedFields.price = { old: oldP.price, new: newP.price };
+    if (opts.available && oldP.available !== newP.available) changedFields.available = { old: oldP.available, new: newP.available };
+    if (opts.name && oldP.name !== newP.name) changedFields.name = { old: oldP.name, new: newP.name };
+    if (opts.description && oldP.description !== newP.description) changedFields.description = { old: oldP.description, new: newP.description };
+    if (opts.attributes) {
+      // Сравниваем только по именам и значениям атрибутов
+      const oldAttrs = (oldP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
+      const newAttrs = (newP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
+      if (oldAttrs !== newAttrs) {
+        changedFields.attributes = { old: oldP.attributes, new: newP.attributes };
       }
-    }
-    // Фото
-    if (JSON.stringify(oldP.picture) !== JSON.stringify(newP.picture)) {
-      changedFields.picture = { old: oldP.picture, new: newP.picture };
-    }
-    // Атрибуты (поимённо)
-    if (JSON.stringify(oldP.attributes) !== JSON.stringify(newP.attributes)) {
-      changedFields.attributes = { old: oldP.attributes, new: newP.attributes };
     }
     if (Object.keys(changedFields).length > 0) {
       diffs.push({ id, type: 'changed', changedFields, oldProduct: oldP, newProduct: newP });
@@ -92,14 +102,34 @@ function diffProducts(oldProducts: Product[], newProducts: Product[]): ProductDi
   return diffs;
 }
 
-// --- Модальное окно отличий ---
+// --- Модальное окно отличий с выбором полей для обновления ---
 interface FeedUpdateDiffModalProps {
   isOpen: boolean;
   onClose: () => void;
   diffs: ProductDiff[];
   onApply: () => void;
+  onFieldSelectionChange: (sel: FieldSelection) => void;
+  fieldSelection: FieldSelection;
 }
-function FeedUpdateDiffModal({ isOpen, onClose, diffs, onApply }: FeedUpdateDiffModalProps) {
+
+interface FieldSelection {
+  [productId: string]: {
+    [field: string]: boolean;
+  };
+}
+
+function FeedUpdateDiffModal({ isOpen, onClose, diffs, onApply, onFieldSelectionChange, fieldSelection }: FeedUpdateDiffModalProps) {
+  // Обработка клика по чекбоксу
+  const handleCheckbox = (productId: string, field: string, checked: boolean) => {
+    onFieldSelectionChange({
+      ...fieldSelection,
+      [productId]: {
+        ...fieldSelection[productId],
+        [field]: checked
+      }
+    });
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Обновление фида: найдено отличие" size="xl"
       footer={
@@ -118,7 +148,7 @@ function FeedUpdateDiffModal({ isOpen, onClose, diffs, onApply }: FeedUpdateDiff
               <tr className="bg-gray-50">
                 <th className="border px-2 py-1">ID</th>
                 <th className="border px-2 py-1">Тип</th>
-                <th className="border px-2 py-1">Изменения</th>
+                <th className="border px-2 py-1">Изменения (выберите, что обновить)</th>
               </tr>
             </thead>
             <tbody>
@@ -134,8 +164,15 @@ function FeedUpdateDiffModal({ isOpen, onClose, diffs, onApply }: FeedUpdateDiff
                     ) : (
                       <ul className="list-disc pl-4">
                         {diff.changedFields && Object.entries(diff.changedFields).map(([field, {old, new: newVal}]) => (
-                          <li key={field}>
-                            <b>{field}:</b> <span className="text-gray-500 line-through">{String(old)}</span> → <span className="text-blue-700">{String(newVal)}</span>
+                          <li key={field} className="mb-1">
+                            <label className="inline-flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={!!fieldSelection[diff.id]?.[field]}
+                                onChange={e => handleCheckbox(diff.id, field, e.target.checked)}
+                              />
+                              <span><b>{field}:</b> <span className="text-gray-500 line-through">{String(old)}</span> → <span className="text-blue-700">{String(newVal)}</span></span>
+                            </label>
                           </li>
                         ))}
                       </ul>
@@ -146,6 +183,77 @@ function FeedUpdateDiffModal({ isOpen, onClose, diffs, onApply }: FeedUpdateDiff
             </tbody>
           </table>
         )}
+      </div>
+    </Modal>
+  );
+}
+
+// --- Модалка массовых опций для обновления фида ---
+interface UpdateOptions {
+  price: boolean;
+  available: boolean;
+  name: boolean;
+  description: boolean;
+  attributes: boolean;
+  addNew: boolean;
+  ignoreMerged: boolean;
+}
+
+const defaultUpdateOptions: UpdateOptions = {
+  price: true,
+  available: true,
+  name: false,
+  description: false,
+  attributes: true,
+  addNew: true,
+  ignoreMerged: true,
+};
+
+function UpdateOptionsModal({ isOpen, onClose, onApply, options, setOptions }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onApply: () => void;
+  options: UpdateOptions;
+  setOptions: (opts: UpdateOptions) => void;
+}) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Массовые опции обновления фида" size="md"
+      footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Отмена</button>
+          <button onClick={onApply} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Далее</button>
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.price} onChange={e => setOptions({ ...options, price: e.target.checked })} />
+          <span>Обновлять цены</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.available} onChange={e => setOptions({ ...options, available: e.target.checked })} />
+          <span>Обновлять наличие</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.name} onChange={e => setOptions({ ...options, name: e.target.checked })} />
+          <span>Обновлять названия</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.description} onChange={e => setOptions({ ...options, description: e.target.checked })} />
+          <span>Обновлять описания</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.attributes} onChange={e => setOptions({ ...options, attributes: e.target.checked })} />
+          <span>Обновлять атрибуты (размеры, цвета и т.д.)</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.addNew} onChange={e => setOptions({ ...options, addNew: e.target.checked })} />
+          <span>Добавлять новые товары</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={options.ignoreMerged} onChange={e => setOptions({ ...options, ignoreMerged: e.target.checked })} />
+          <span>Игнорировать id, которые были объединены (не считать их новыми)</span>
+        </label>
       </div>
     </Modal>
   );
@@ -191,6 +299,11 @@ const FeedEditor = () => {
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [diffs, setDiffs] = useState<ProductDiff[]>([]);
   const [pendingParsedFeed, setPendingParsedFeed] = useState<Feed | null>(null);
+  // ДОБАВИТЬ useState для поиска бренда
+  const [vendorSearch, setVendorSearch] = useState('');
+  const [fieldSelection, setFieldSelection] = useState<FieldSelection>({});
+  const [showUpdateOptionsModal, setShowUpdateOptionsModal] = useState(false);
+  const [updateOptions, setUpdateOptions] = useState<UpdateOptions>(defaultUpdateOptions);
   
   // Загружаем URL фида при монтировании компонента, если фид уже опубликован
   useEffect(() => {
@@ -262,15 +375,22 @@ const FeedEditor = () => {
       const matchesVendor = selectedVendors.length === 0 || (product.vendor && selectedVendors.includes(product.vendor));
       // Фильтр по участию в выгрузке
       const matchesExport = exportFilter === null || product.includeInExport === exportFilter;
+      // Фильтр по скидке
+      let matchesDiscount = true;
+      const discountFilter = attributeFilters['__discount']?.[0] || 'all';
+      if (discountFilter === 'discount') matchesDiscount = product.oldPrice != null;
+      if (discountFilter === 'no_discount') matchesDiscount = product.oldPrice == null;
       // Универсальная фильтрация по атрибутам
-      const matchesAttributes = Object.entries(attributeFilters).every(([attrName, selectedValues]) => {
-        if (!selectedValues.length) return true;
-        const attr = (product.attributes || []).find(a => a.name === attrName);
-        return attr && selectedValues.includes(attr.value);
-      });
-      return matchesSearch && matchesAvailability && matchesVendor && matchesExport && matchesAttributes;
+      const matchesAttributes = Object.entries(attributeFilters)
+        .filter(([attrName]) => attrName !== '__discount')
+        .every(([attrName, selectedValues]) => {
+          if (!selectedValues.length) return true;
+          const attr = (product.attributes || []).find(a => a.name === attrName);
+          return attr && selectedValues.includes(attr.value);
+        });
+      return matchesSearch && matchesAvailability && matchesVendor && matchesExport && matchesDiscount && matchesAttributes;
     });
-  }, [currentFeed, searchQuery, availabilityFilter, selectedVendors, exportFilter, attributeFilters]);
+  }, [currentFeed, searchQuery, availabilityFilter, selectedVendors, exportFilter, attributeFilters, vendorSearch]);
   
   // Если нет currentFeed, показываем лоадер
   if (!currentFeed) {
@@ -631,101 +751,71 @@ const FeedEditor = () => {
   
   // Оптимизированная панель инструментов с компактным интерфейсом
   const renderToolbar = () => (
-    <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
-        {/* Только action-кнопки, без названия и количества */}
-        <div className="flex items-center gap-2 ml-auto border-l pl-4">
+    <div className="bg-white p-2 rounded mb-2">
+      <div className="flex flex-row justify-end items-center gap-1">
+        {/* Минималистичные action-кнопки */}
+        <button
+          onClick={() => setShowAISettingsModal(true)}
+          className="p-2 hover:bg-gray-100 rounded transition"
+          title="Настройки AI"
+        >
+          <Settings className="h-5 w-5 text-gray-500" />
+        </button>
+        <button
+          onClick={() => setShowAIGenerationModal(true)}
+          className="p-2 hover:bg-purple-50 rounded transition"
+          title="AI-генерация"
+        >
+          <Sparkles className="h-5 w-5 text-purple-500" />
+        </button>
+        <button
+          onClick={handleExportFeed}
+          className="p-2 hover:bg-green-50 rounded transition"
+          title="Экспорт фида"
+        >
+          <Download className="h-5 w-5 text-green-600" />
+        </button>
+        {currentFeed?.isPublished ? (
+          <>
             <button
-            onClick={() => setShowAISettingsModal(true)}
-            className="flex items-center gap-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-            title="Настройки AI"
+              onClick={handleUpdatePublishedFeed}
+              disabled={updatingFeed}
+              className="p-2 hover:bg-green-50 rounded transition disabled:opacity-50"
+              title="Обновить публикацию"
             >
-            <Settings className="h-4 w-4" />
-            <span className="hidden md:inline">Настройки AI</span>
+              <RefreshCw className={`h-5 w-5 ${updatingFeed ? 'animate-spin text-gray-400' : 'text-green-600'}`} />
             </button>
             <button
-              onClick={() => setShowAIGenerationModal(true)}
-              className="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-              title="AI-генерация"
+              onClick={handleDeletePublishedFeed}
+              disabled={deletingFeed}
+              className="p-2 hover:bg-red-50 rounded transition disabled:opacity-50"
+              title="Отменить публикацию"
             >
-              <Sparkles className="h-4 w-4" />
-              <span className="hidden md:inline">AI</span>
+              <Unlink className={`h-5 w-5 ${deletingFeed ? 'animate-spin text-gray-400' : 'text-red-500'}`} />
             </button>
-            <button
-              onClick={handleExportFeed}
-              className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              title="Экспорт фида"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden md:inline">Экспорт</span>
-            </button>
-          {/* Кнопки публикации и обновления */}
-            {currentFeed?.isPublished ? (
-            <>
-                <button
-                  onClick={handleUpdatePublishedFeed}
-                  disabled={updatingFeed}
-                  className={`flex items-center gap-1 px-3 py-2 rounded-md ${
-                    updatingFeed 
-                      ? 'bg-gray-400 text-white cursor-not-allowed' 
-                      : 'bg-green-600 text-white hover:bg-green-700'
-                  }`}
-                  title="Обновить публикацию"
-                >
-                  {updatingFeed ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  <span className="hidden md:inline">Обновить</span>
-                </button>
-                <button
-                  onClick={handleDeletePublishedFeed}
-                  disabled={deletingFeed}
-                  className={`flex items-center gap-1 px-3 py-2 rounded-md ${
-                    deletingFeed 
-                      ? 'bg-gray-400 text-white cursor-not-allowed' 
-                      : 'bg-red-600 text-white hover:bg-red-700'
-                  }`}
-                  title="Удалить публикацию"
-                >
-                  {deletingFeed ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Unlink className="h-4 w-4" />
-                  )}
-                  <span className="hidden md:inline">Отменить публикацию</span>
-                </button>
-            </>
+          </>
+        ) : (
+          <button
+            onClick={handlePublishFeed}
+            disabled={publishingFeed}
+            className="p-2 hover:bg-blue-50 rounded transition disabled:opacity-50"
+            title="Опубликовать фид"
+          >
+            {publishingFeed ? (
+              <RefreshCw className="h-5 w-5 animate-spin text-gray-400" />
             ) : (
-              <button
-                onClick={handlePublishFeed}
-                disabled={publishingFeed}
-                className={`flex items-center gap-1 px-3 py-2 rounded-md ${
-                  publishingFeed 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-                title="Опубликовать фид"
-              >
-                {publishingFeed ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Globe className="h-4 w-4" />
-                )}
-                <span className="hidden md:inline">Опубликовать</span>
-              </button>
+              <Globe className="h-5 w-5 text-blue-600" />
             )}
-            <button
-            onClick={reloadFeedData}
-            className="flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
-            title="Обновить данные фида"
-            >
-            <RefreshCw className="h-4 w-4" />
-            <span className="hidden md:inline">Обновить фид</span>
-            </button>
-          </div>
-        </div>
+          </button>
+        )}
+        <button
+          onClick={reloadFeedData}
+          className="p-2 hover:bg-gray-100 rounded transition"
+          title="Обновить данные фида"
+        >
+          <RefreshCw className="h-5 w-5 text-gray-500" />
+        </button>
+      </div>
     </div>
   );
   
@@ -764,6 +854,7 @@ const FeedEditor = () => {
           <div className="max-w-3xl w-full mx-4">
             <AIBulkGeneration 
               feed={currentFeed}
+              selectedProductIds={selectedProducts}
               onComplete={(updatedFeed, results) => {
                 console.log('Завершена генерация AI, обновляем продукты');
                 console.log('Количество результатов генерации:', results.length);
@@ -843,113 +934,101 @@ const FeedEditor = () => {
 
   // Рендер сайдбара с фильтрами в виде аккордеона
   const renderSidebarFilters = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Секция Доступность */}
-      <div className="border rounded-md overflow-hidden bg-white shadow-sm">
+      <div>
         <div 
-          className="flex items-center justify-between px-4 py-3 bg-white cursor-pointer hover:bg-gray-50"
+          className="flex items-center justify-between cursor-pointer select-none mb-2"
           onClick={() => toggleSection('availability')}
         >
-          <span className="text-sm font-medium">Доступность</span>
+          <span className="text-sm font-semibold">Доступность</span>
           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections.availability ? '' : 'transform rotate-180'}`} />
         </div>
         {!collapsedSections.availability && (
-          <div className="px-4 py-3 bg-white border-t border-gray-100">
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === null} onChange={() => setAvailabilityFilter(null)} />
-                <span className="ml-2 text-sm">Все</span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === true} onChange={() => setAvailabilityFilter(true)} />
-                <span className="ml-2 text-sm">В наличии</span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === false} onChange={() => setAvailabilityFilter(false)} />
-                <span className="ml-2 text-sm">Отсутствует</span>
-              </label>
-            </div>
+          <div className="flex flex-col gap-2 pl-1">
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === null} onChange={() => setAvailabilityFilter(null)} />
+              <span className="text-sm">Все</span>
+            </label>
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === true} onChange={() => setAvailabilityFilter(true)} />
+              <span className="text-sm">В наличии</span>
+            </label>
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={availabilityFilter === false} onChange={() => setAvailabilityFilter(false)} />
+              <span className="text-sm">Отсутствует</span>
+            </label>
           </div>
         )}
       </div>
-      
       {/* Секция В выгрузке */}
-      <div className="border rounded-md overflow-hidden bg-white shadow-sm">
+      <div>
         <div 
-          className="flex items-center justify-between px-4 py-3 bg-white cursor-pointer hover:bg-gray-50"
+          className="flex items-center justify-between cursor-pointer select-none mb-2"
           onClick={() => toggleSection('export')}
         >
-          <span className="text-sm font-medium">В выгрузке</span>
+          <span className="text-sm font-semibold">В выгрузке</span>
           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections.export ? '' : 'transform rotate-180'}`} />
         </div>
         {!collapsedSections.export && (
-          <div className="px-4 py-3 bg-white border-t border-gray-100">
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === null} onChange={() => setExportFilter(null)} />
-                <span className="ml-2 text-sm">Все</span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === true} onChange={() => setExportFilter(true)} />
-                <span className="ml-2 text-sm">Включён</span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === false} onChange={() => setExportFilter(false)} />
-                <span className="ml-2 text-sm">Исключён</span>
-              </label>
-            </div>
+          <div className="flex flex-col gap-2 pl-1">
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === null} onChange={() => setExportFilter(null)} />
+              <span className="text-sm">Все</span>
+            </label>
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === true} onChange={() => setExportFilter(true)} />
+              <span className="text-sm">Включён</span>
+            </label>
+            <label className="flex items-center cursor-pointer gap-2">
+              <input type="radio" className="h-4 w-4 text-blue-600" checked={exportFilter === false} onChange={() => setExportFilter(false)} />
+              <span className="text-sm">Исключён</span>
+            </label>
           </div>
         )}
       </div>
-      
-      {/* Секция Производитель */}
-      <div className="border rounded-md overflow-hidden bg-white shadow-sm">
+      {/* Секция Производитель с поиском */}
+      <div>
         <div 
-          className="flex items-center justify-between px-4 py-3 bg-white cursor-pointer hover:bg-gray-50"
+          className="flex items-center justify-between cursor-pointer select-none mb-2"
           onClick={() => toggleSection('vendor')}
         >
-          <span className="text-sm font-medium">Производитель</span>
-          <div className="flex items-center">
-            {selectedVendors.length > 0 && (
-              <span className="mr-2 text-xs py-0.5 px-1.5 bg-blue-100 text-blue-800 rounded-full">
-                {selectedVendors.length}
-              </span>
-            )}
-            <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections.vendor ? '' : 'transform rotate-180'}`} />
-          </div>
+          <span className="text-sm font-semibold">Производитель</span>
+          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections.vendor ? '' : 'transform rotate-180'}`} />
         </div>
         {!collapsedSections.vendor && (
-          <div className="px-4 py-3 bg-white border-t border-gray-100">
-            {uniqueVendors.length > 0 ? (
-              <div className="max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                <div className="flex flex-col gap-2">
-                  {uniqueVendors.map(vendor => (
-                    <label key={vendor ?? ''} className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 text-blue-600 rounded"
-                        checked={selectedVendors.includes(vendor ?? '')}
-                        onChange={e => {
-                          const safeVendor = vendor ?? '';
-                          setSelectedVendors(prev => {
-                            if (e.target.checked) {
-                              return [...prev, safeVendor].filter(v => v);
-                            } else {
-                              return prev.filter(v => v && v === safeVendor ? false : true);
-                            }
-                          });
-                        }}
-                      />
-                      <span className="ml-2 text-sm truncate">{vendor}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-500 text-center py-2">Нет данных</div>
-            )}
+          <div className="max-h-48 overflow-y-auto pr-1 flex flex-col gap-2 pl-1">
+            <input
+              type="text"
+              placeholder="Поиск бренда..."
+              className="mb-2 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              value={vendorSearch}
+              onChange={e => setVendorSearch(e.target.value)}
+            />
+            {uniqueVendors.filter(vendor =>
+              !vendorSearch || (vendor ?? '').toLowerCase().includes(vendorSearch.toLowerCase())
+            ).map(vendor => (
+              <label key={vendor ?? ''} className="flex items-center cursor-pointer gap-2">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 rounded"
+                  checked={selectedVendors.includes(vendor ?? '')}
+                  onChange={e => {
+                    const safeVendor = vendor ?? '';
+                    setSelectedVendors(prev => {
+                      if (e.target.checked) {
+                        return [...prev, safeVendor].filter(v => v);
+                      } else {
+                        return prev.filter(v => v && v === safeVendor ? false : true);
+                      }
+                    });
+                  }}
+                />
+                <span className="text-sm truncate">{vendor}</span>
+              </label>
+            ))}
             {selectedVendors.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="mt-3 pt-3">
                 <button
                   onClick={() => setSelectedVendors([])}
                   className="w-full px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
@@ -961,99 +1040,130 @@ const FeedEditor = () => {
           </div>
         )}
       </div>
-      
-      {/* Динамические секции для атрибутов */}
-      {Object.entries(attributeOptions).map(([attrName, values]) => {
-        // Для атрибутов добавляем динамические ключи в состояние коллапса
+      {/* Фильтр: Со скидкой (чекбоксы) */}
+      <div>
+        <div 
+          className="flex items-center justify-between cursor-pointer select-none mb-2"
+          onClick={() => toggleSection('discount')}
+        >
+          <span className="text-sm font-semibold">Со скидкой</span>
+          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections.discount ? '' : 'transform rotate-180'}`} />
+        </div>
+        {!collapsedSections.discount && (
+          <div className="flex flex-col gap-2 pl-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="radio"
+                name="discountFilter"
+                className="h-4 w-4 text-blue-600"
+                checked={!attributeFilters['__discount'] || attributeFilters['__discount'][0] === 'all'}
+                onChange={() => setAttributeFilters(prev => ({ ...prev, __discount: ['all'] }))}
+              />
+              <span className="text-sm">Все</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="radio"
+                name="discountFilter"
+                className="h-4 w-4 text-blue-600"
+                checked={attributeFilters['__discount']?.[0] === 'discount'}
+                onChange={() => setAttributeFilters(prev => ({ ...prev, __discount: ['discount'] }))}
+              />
+              <span className="text-sm">Со скидкой</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="radio"
+                name="discountFilter"
+                className="h-4 w-4 text-blue-600"
+                checked={attributeFilters['__discount']?.[0] === 'no_discount'}
+                onChange={() => setAttributeFilters(prev => ({ ...prev, __discount: ['no_discount'] }))}
+              />
+              <span className="text-sm">Без скидки</span>
+            </label>
+          </div>
+        )}
+      </div>
+      {/* Динамические секции для атрибутов, кроме 'Краткое описание' */}
+      {Object.entries(attributeOptions).filter(([attrName]) => attrName.toLowerCase() !== 'краткое описание').map(([attrName, values]) => {
         const sectionKey = `attr_${attrName}`;
         if (collapsedSections[sectionKey] === undefined) {
           setCollapsedSections(prev => ({
             ...prev,
-            [sectionKey]: true // По умолчанию все секции атрибутов свернуты
+            [sectionKey]: true
           }));
         }
-  
-  return (
-          <div key={attrName} className="border rounded-md overflow-hidden bg-white shadow-sm">
+        return (
+          <div key={attrName}>
             <div 
-              className="flex items-center justify-between px-4 py-3 bg-white cursor-pointer hover:bg-gray-50"
+              className="flex items-center justify-between cursor-pointer select-none mb-2"
               onClick={() => toggleSection(sectionKey)}
             >
-              <span className="text-sm font-medium truncate">{attrName}</span>
-              <div className="flex items-center">
-                {attributeFilters[attrName]?.length > 0 && (
-                  <span className="mr-2 text-xs py-0.5 px-1.5 bg-blue-100 text-blue-800 rounded-full">
-                    {attributeFilters[attrName].length}
-                  </span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections[sectionKey] ? '' : 'transform rotate-180'}`} />
-              </div>
+              <span className="text-sm font-semibold truncate">{attrName}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${collapsedSections[sectionKey] ? '' : 'transform rotate-180'}`} />
             </div>
             {!collapsedSections[sectionKey] && (
-              <div className="px-4 py-3 bg-white border-t border-gray-100">
-                <div className="max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                  {/* Для размеров - разбиваем значения */}
-                  {attrName.toLowerCase().includes('размер') ? (
-                    (() => {
-                      const allSizes = new Set<string>();
-                      values.forEach(val => {
-                        val.split(/[,;]+/).map(s => s.trim()).filter(Boolean).forEach(size => allSizes.add(size));
-                      });
-                      const sizeList = Array.from(allSizes).sort((a, b) => a.localeCompare(b, 'ru', {numeric: true}));
-                      
-                      return (
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {sizeList.map(size => (
-                            <label key={size} className="flex items-center cursor-pointer px-2 py-1 bg-gray-50 hover:bg-gray-100 text-xs rounded mb-1">
-                              <input
-                                type="checkbox"
-                                className="h-3 w-3 text-blue-600 mr-1.5 rounded"
-                                checked={attributeFilters[attrName]?.includes(size) || false}
-                                onChange={e => {
-                                  setAttributeFilters(prev => {
-                                    const prevArr = prev[attrName] || [];
-                                    if (e.target.checked) {
-                                      return { ...prev, [attrName]: [...prevArr, size] };
-                                    } else {
-                                      return { ...prev, [attrName]: prevArr.filter(v => v !== size) };
-                                    }
-                                  });
-                                }}
-                              />
-                              {size}
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    // Для других атрибутов - стандартный вывод
-                    <div className="flex flex-col gap-2">
-                      {values.map(value => (
-                        <label key={value} className="flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 text-blue-600 rounded"
-                            checked={attributeFilters[attrName]?.includes(value) || false}
-                            onChange={e => {
-                              setAttributeFilters(prev => {
-                                const prevArr = prev[attrName] || [];
-                                if (e.target.checked) {
-                                  return { ...prev, [attrName]: [...prevArr, value] };
-                                } else {
-                                  return { ...prev, [attrName]: prevArr.filter(v => v !== value) };
-                                }
-                              });
-                            }}
-                          />
-                          <span className="ml-2 text-sm">{value}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              <div className="flex flex-col gap-2 pl-1">
+                {/* Для размеров - разбиваем значения */}
+                {attrName.toLowerCase().includes('размер') ? (
+                  (() => {
+                    const allSizes = new Set<string>();
+                    values.forEach(val => {
+                      val.split(/[,;]+/).map(s => s.trim()).filter(Boolean).forEach(size => allSizes.add(size));
+                    });
+                    const sizeList = Array.from(allSizes).sort((a, b) => a.localeCompare(b, 'ru', {numeric: true}));
+                    return (
+                      <div className="flex flex-wrap gap-1 mb-1">
+                        {sizeList.map(size => (
+                          <label key={size} className="flex items-center cursor-pointer px-2 py-1 text-xs rounded mb-1 gap-2">
+                            <input
+                              type="checkbox"
+                              className="h-3 w-3 text-blue-600 mr-1.5 rounded"
+                              checked={attributeFilters[attrName]?.includes(size) || false}
+                              onChange={e => {
+                                setAttributeFilters(prev => {
+                                  const prevArr = prev[attrName] || [];
+                                  if (e.target.checked) {
+                                    return { ...prev, [attrName]: [...prevArr, size] };
+                                  } else {
+                                    return { ...prev, [attrName]: prevArr.filter(v => v !== size) };
+                                  }
+                                });
+                              }}
+                            />
+                            {size}
+                          </label>
+                        ))}
+                      </div>
+                    );
+                  })()
+                ) : (
+                  // Для других атрибутов - стандартный вывод
+                  <div className="flex flex-col gap-2">
+                    {values.map(value => (
+                      <label key={value} className="flex items-center cursor-pointer gap-2">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 rounded"
+                          checked={attributeFilters[attrName]?.includes(value) || false}
+                          onChange={e => {
+                            setAttributeFilters(prev => {
+                              const prevArr = prev[attrName] || [];
+                              if (e.target.checked) {
+                                return { ...prev, [attrName]: [...prevArr, value] };
+                              } else {
+                                return { ...prev, [attrName]: prevArr.filter(v => v !== value) };
+                              }
+                            });
+                          }}
+                        />
+                        <span className="text-sm">{value}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 {attributeFilters[attrName]?.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-100">
+                  <div className="mt-3 pt-3">
                     <button
                       onClick={() => setAttributeFilters(prev => ({...prev, [attrName]: []}))}
                       className="w-full px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
@@ -1067,22 +1177,6 @@ const FeedEditor = () => {
           </div>
         );
       })}
-      
-      {/* Кнопка сброса всех фильтров */}
-      {(availabilityFilter !== null || selectedVendors.length > 0 || exportFilter !== null || Object.values(attributeFilters).some(arr => arr.length > 0)) && (
-        <button
-          className="mt-4 w-full py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors"
-          onClick={() => {
-            setAvailabilityFilter(null);
-            setSelectedVendors([]);
-            setExportFilter(null);
-            setAttributeFilters({});
-            setSearchQuery('');
-          }}
-        >
-          Сбросить все фильтры
-        </button>
-      )}
     </div>
   );
   
@@ -1212,6 +1306,13 @@ const FeedEditor = () => {
       alert('В исходном фиде не указана ссылка (metadata.url)');
       return;
     }
+    setShowUpdateOptionsModal(true); // сначала показываем модалку опций
+  };
+
+  // После выбора опций — запускаем сравнение
+  const handleApplyUpdateOptions = async () => {
+    setShowUpdateOptionsModal(false);
+    if (!currentFeed || !currentFeed.metadata?.url) return;
     try {
       const xml = await fetchFeedContent(currentFeed.metadata.url);
       let parsedFeed;
@@ -1229,8 +1330,8 @@ const FeedEditor = () => {
           currentFeed.metadata.url
         );
       }
-      // Сравниваем товары
-      const diffs = diffProducts(currentFeed.products, parsedFeed.products);
+      // Сравниваем товары с учётом опций (реализация будет далее)
+      const diffs = diffProducts(currentFeed.products, parsedFeed.products, updateOptions, currentFeed.metadata.mergedIdMap);
       setDiffs(diffs);
       setPendingParsedFeed(parsedFeed);
       setShowDiffModal(true);
@@ -1241,14 +1342,30 @@ const FeedEditor = () => {
 
   const handleApplyFeedUpdate = () => {
     if (!pendingParsedFeed) return;
-    // Применяем только отличающиеся данные
+    // Применяем только отличающиеся данные и только выбранные поля
     const diffsToApply = diffs;
     const updatedProducts = [...currentFeed.products];
     // Обновляем существующие
     diffsToApply.filter(d => d.type === 'changed').forEach(d => {
       const idx = updatedProducts.findIndex(p => p.id === d.id);
       if (idx !== -1) {
-        updatedProducts[idx] = { ...updatedProducts[idx], ...d.newProduct };
+        const selectedFields = fieldSelection[d.id] || {};
+        const newProduct: any = { ...updatedProducts[idx] };
+        Object.entries(selectedFields).forEach(([field, checked]) => {
+          if (checked) {
+            if (field === 'attributes' && Array.isArray(d.newProduct.attributes)) {
+              // Добавляем только новые значения атрибутов
+              const oldAttrs = Array.isArray(newProduct.attributes) ? newProduct.attributes : [];
+              const newAttrs = d.newProduct.attributes.filter((attr: any) => {
+                return !oldAttrs.some((a: any) => a.name === attr.name && a.value === attr.value);
+              });
+              newProduct.attributes = [...oldAttrs, ...newAttrs];
+            } else {
+              newProduct[field] = d.newProduct[field];
+            }
+          }
+        });
+        updatedProducts[idx] = newProduct;
       }
     });
     // Добавляем новые
@@ -1267,6 +1384,7 @@ const FeedEditor = () => {
     setShowDiffModal(false);
     setPendingParsedFeed(null);
     setDiffs([]);
+    setFieldSelection({});
     alert('Обновление завершено!');
   };
 
@@ -1276,10 +1394,10 @@ const FeedEditor = () => {
       <div className="bg-white shadow-sm border-b border-gray-200 p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2">
+            {/* <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2">
               <ArrowLeft className="h-4 w-4" />
               <span>Назад к списку фидов</span>
-            </Link>
+            </Link> */}
             <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
               {currentFeed.name}
               {currentFeed.metadata?.url && (
@@ -1295,12 +1413,16 @@ const FeedEditor = () => {
                 </a>
               )}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              <span>{filteredProducts.length} товаров</span>
-              {filteredProducts.length !== currentFeed.products.length && (
-                <span> (всего {currentFeed.products.length})</span>
-              )}
-            </p>
+            {/* Информация о фиде в одну строку */}
+            <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-700">
+              <span><span className="font-medium">Магазин:</span> {currentFeed.metadata?.name || '—'}</span>
+              <span className="hidden md:inline-block h-4 w-px bg-gray-300 align-middle"></span>
+              <span><span className="font-medium">Товаров:</span> {currentFeed.products.length}</span>
+              <span className="hidden md:inline-block h-4 w-px bg-gray-300 align-middle"></span>
+              <span><span className="font-medium">Категорий:</span> {currentFeed.categories.length}</span>
+              <span className="hidden md:inline-block h-4 w-px bg-gray-300 align-middle"></span>
+              <span><span className="font-medium">Последнее изменение:</span> {currentFeed.metadata?.date ? (new Date(currentFeed.metadata.date).toLocaleString('ru-RU')) : '—'}</span>
+            </div>
           </div>
       {renderToolbar()}
         </div>
@@ -1343,23 +1465,17 @@ const FeedEditor = () => {
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Боковая панель с фильтрами */}
         <div className={`bg-white border-r border-gray-200 transition-all duration-200 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-72 opacity-100'}`}>
-          <div className="h-full flex flex-col">
-            <div className="p-4 pb-2">
-              <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Назад к списку фидов</span>
-              </Link>
-            </div>
-            <div className="flex items-center justify-between border-b p-4 pt-0">
-              <h3 className="font-medium text-gray-700">Фильтры</h3>
-              <button 
-                onClick={() => setSidebarCollapsed(true)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div className="h-full flex flex-col relative">
+            {/* Кнопка сворачивания фильтров — в левом верхнем углу */}
+            <button 
+              onClick={() => setSidebarCollapsed(true)}
+              className="absolute top-2 left-2 text-gray-500 hover:text-blue-600 z-10 p-1 rounded transition"
+              title="Свернуть фильтры"
+              style={{ boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)' }}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <div className="flex-1 overflow-y-auto p-4 pt-2 custom-scrollbar">
               {renderSidebarFilters()}
             </div>
           </div>
@@ -1823,6 +1939,8 @@ const FeedEditor = () => {
           onClose={() => setShowDiffModal(false)}
           diffs={diffs}
           onApply={handleApplyFeedUpdate}
+          onFieldSelectionChange={setFieldSelection}
+          fieldSelection={fieldSelection}
         />
       )}
       {showImageModal && currentProduct && currentProduct.picture && currentProduct.picture.length > 0 && (
@@ -1906,6 +2024,15 @@ const FeedEditor = () => {
       
       {/* Инлайн-стили для скроллбара */}
       <style>{customScrollbarStyles}</style>
+      {showUpdateOptionsModal && (
+        <UpdateOptionsModal
+          isOpen={showUpdateOptionsModal}
+          onClose={() => setShowUpdateOptionsModal(false)}
+          onApply={handleApplyUpdateOptions}
+          options={updateOptions}
+          setOptions={setUpdateOptions}
+        />
+      )}
     </div>
   );
 };

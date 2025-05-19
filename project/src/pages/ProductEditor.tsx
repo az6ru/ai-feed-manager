@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Save, Trash2, Plus, X, AlertCircle, Check, Sparkles, ArrowRight
+  ArrowLeft, Save, Trash2, Plus, X, AlertCircle, Check, Sparkles, ArrowRight, ExternalLink
 } from 'lucide-react';
 import { useFeed } from '../context/FeedContext';
 import { Product, Category, ProductAttribute } from '../types/feed';
@@ -276,6 +276,39 @@ const ProductEditor = () => {
       
       {/* Basic Information Card */}
       <Card title="Basic Information" className="mb-4 shadow-sm">
+        {/* ID товара */}
+        <Field 
+          label="ID товара" 
+          htmlFor="product-id"
+        >
+          <input
+            type="text"
+            id="product-id"
+            value={product.id}
+            readOnly
+            className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 cursor-default"
+          />
+        </Field>
+        {/* Объединённые ID */}
+        {currentFeed.metadata?.mergedIdMap && product.mergedFromVariants && Number(product.mergedFromVariants) > 1 && (
+          <Field 
+            label="Объединённые ID" 
+            htmlFor="merged-ids"
+          >
+            <input
+              type="text"
+              id="merged-ids"
+              value={(() => {
+                const mergedIds = Object.entries(currentFeed.metadata.mergedIdMap)
+                  .filter(([_, masterId]) => masterId === product.id)
+                  .map(([variantId]) => variantId);
+                return mergedIds.length > 0 ? mergedIds.join(', ') : '—';
+              })()}
+              readOnly
+              className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 cursor-default"
+            />
+          </Field>
+        )}
         {/* Product Name Field */}
         <Field 
           label="Product Name" 
@@ -283,14 +316,14 @@ const ProductEditor = () => {
           required 
           error={formErrors.name}
         >
-          <div className="flex items-center gap-2">
+          <div className="relative flex items-center">
             <input
               type="text"
               name="name"
               id="name"
               value={product.name}
               onChange={handleInputChange}
-              className={`block w-full px-3 py-2 border rounded-md text-sm ${
+              className={`block w-full px-3 py-2 border rounded-md text-sm pr-12 ${
                 formErrors.name 
                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -298,11 +331,14 @@ const ProductEditor = () => {
             />
             <Button
               type="button"
+              aria-label="Сгенерировать название AI"
               onClick={async () => {
                 if (!product) return;
-                
                 try {
-                  const generatedName = await aiService.generateName(product);
+                  const generatedName = await aiService.generateName(
+                    product,
+                    currentFeed.aiSettings?.namePrompt || undefined
+                  );
                   handleChange('generatedName', generatedName);
                   handleChange('name', generatedName);
                 } catch (error) {
@@ -310,14 +346,14 @@ const ProductEditor = () => {
                   alert('Не удалось сгенерировать название. Проверьте настройки ИИ.');
                 }
               }}
-              variant="primary"
+              variant="ghost"
               size="sm"
-              leftIcon={<Sparkles className="w-3 h-3" />}
-            >
-              AI
-            </Button>
+              leftIcon={<Sparkles className="w-4 h-4" />}
+              className="absolute right-0 top-0 bottom-0 h-full px-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 rounded-r-md border-l border-gray-200"
+              style={{ minWidth: 0 }}
+              children={null}
+            />
           </div>
-          
           {product.generatedName && product.generatedName !== product.name && (
             <AIGenerated
               title="Сгенерированное название:"
@@ -332,14 +368,14 @@ const ProductEditor = () => {
           label="Description" 
           htmlFor="description"
         >
-          <div className="flex items-start gap-2">
+          <div className="relative flex items-center">
             <textarea
               id="description"
               name="description"
               rows={4}
               value={product.description || ''}
               onChange={handleInputChange}
-              className={`block w-full px-3 py-2 border rounded-md text-sm ${
+              className={`block w-full px-3 py-2 border rounded-md text-sm pr-12 ${
                 formErrors.description 
                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -347,11 +383,14 @@ const ProductEditor = () => {
             />
             <Button
               type="button"
+              aria-label="Сгенерировать описание AI"
               onClick={async () => {
                 if (!product) return;
-                
                 try {
-                  const generatedDescription = await aiService.generateDescription(product);
+                  const generatedDescription = await aiService.generateDescription(
+                    product,
+                    currentFeed.aiSettings?.descriptionPrompt || undefined
+                  );
                   handleChange('generatedDescription', generatedDescription);
                   handleChange('description', generatedDescription);
                 } catch (error) {
@@ -359,12 +398,13 @@ const ProductEditor = () => {
                   alert('Не удалось сгенерировать описание. Проверьте настройки ИИ.');
                 }
               }}
-              variant="primary"
+              variant="ghost"
               size="sm"
-              leftIcon={<Sparkles className="w-3 h-3" />}
-            >
-              AI
-            </Button>
+              leftIcon={<Sparkles className="w-4 h-4" />}
+              className="absolute right-0 top-0 bottom-0 h-full flex items-center px-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 rounded-r-md border-l border-gray-200"
+              style={{ minWidth: 0 }}
+              children={null}
+            />
           </div>
           
           {product.generatedDescription && product.generatedDescription !== product.description && (
@@ -489,18 +529,23 @@ const ProductEditor = () => {
           label="Currency" 
           htmlFor="currency"
         >
-          <select
-            id="currency"
-            name="currency"
-            value={product.currency}
-            onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
-          >
-            <option value="RUB">RUB</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
+          <div className="relative">
+            <select
+              id="currency"
+              name="currency"
+              value={product.currency}
+              onChange={handleInputChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors appearance-none pr-10"
+            >
+              <option value="RUB">RUB</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+            </span>
+          </div>
         </Field>
         
         {/* Category Field */}
@@ -510,24 +555,29 @@ const ProductEditor = () => {
           required 
           error={formErrors.categoryId}
         >
-          <select
-            id="categoryId"
-            name="categoryId"
-            value={product.categoryId}
-            onChange={handleInputChange}
-            className={`block w-full px-3 py-2 border rounded-md text-sm transition-colors ${
-              formErrors.categoryId 
-                ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-            }`}
-          >
-            <option value="">Select a category</option>
-            {currentFeed.categories.map((category: Category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="categoryId"
+              name="categoryId"
+              value={product.categoryId}
+              onChange={handleInputChange}
+              className={`block w-full px-3 py-2 border rounded-md text-sm transition-colors appearance-none pr-10 ${
+                formErrors.categoryId 
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+            >
+              <option value="">Select a category</option>
+              {currentFeed.categories.map((category: Category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+            </span>
+          </div>
         </Field>
         
         {/* URL Field */}
@@ -535,16 +585,28 @@ const ProductEditor = () => {
           label="URL товара" 
           htmlFor="url"
         >
-          <input
-            type="text"
-            name="url"
-            id="url"
-            value={product.url || ''}
-            onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
-            placeholder="https://example.com/product/123"
-          />
-          
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              name="url"
+              id="url"
+              value={product.url || ''}
+              onChange={handleInputChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors pr-10"
+              placeholder="https://example.com/product/123"
+            />
+            {product.url && (
+              <a
+                href={product.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute right-2 text-blue-600 hover:text-blue-800"
+                title="Открыть ссылку в новой вкладке"
+              >
+                <ExternalLink className="w-5 h-5" />
+              </a>
+            )}
+          </div>
           {product.generatedUrl && (
             <AIGenerated
               content={product.generatedUrl}

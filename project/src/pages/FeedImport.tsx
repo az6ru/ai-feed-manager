@@ -5,6 +5,7 @@ import { useFeed } from '../context/FeedContext';
 import { isProxyAvailable, fetchFeedContent } from '../services/proxyService';
 import DuplicatesAnalyzer from '../components/DuplicatesAnalyzer';
 import { Feed } from '../types/feed';
+import Modal from '../components/layout/Modal';
 
 const FeedImport = () => {
   const [importMethod, setImportMethod] = useState<'file' | 'url'>('file');
@@ -22,6 +23,9 @@ const FeedImport = () => {
   const [enableDuplicatesCheck, setEnableDuplicatesCheck] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [pendingMergedFeed, setPendingMergedFeed] = useState<Feed | null>(null);
+  const [showAddFeedModal, setShowAddFeedModal] = useState(false);
+  const [pendingFeedToAdd, setPendingFeedToAdd] = useState<Feed | null>(null);
   
   const { importFeedFromXml, importLargeFeedFromXml, setCurrentFeed, addFeed, updateFeed, feeds } = useFeed();
   const navigate = useNavigate();
@@ -179,15 +183,14 @@ const FeedImport = () => {
           throw new Error('Failed to parse feed data');
         }
         
-        // Если включена проверка дубликатов, показываем анализатор
         if (enableDuplicatesCheck) {
           setParsedFeed(feed);
           setShowDuplicatesAnalyzer(true);
           setIsLoading(false);
         } else {
-          // Иначе сразу добавляем фид и переходим к просмотру
-          setCurrentFeed(feed.id);
-          navigate(`/feeds/${feed.id}`);
+          setPendingFeedToAdd(feed);
+          setShowAddFeedModal(true);
+          setIsLoading(false);
         }
       } catch (parseError: any) {
         console.error('Parse error:', parseError);
@@ -203,20 +206,10 @@ const FeedImport = () => {
   
   // Обработчик завершения анализа дубликатов
   const handleDuplicatesMergeComplete = (mergedFeed: Feed) => {
-    // Не добавляем фид повторно, просто обновляем существующий или используем mergedFeed
-    // Проверяем, существует ли уже фид с таким ID
-    const existingFeedIndex = feeds.findIndex((f: Feed) => f.id === mergedFeed.id);
-    
-    if (existingFeedIndex !== -1) {
-      // Если фид с таким ID уже существует, обновляем его
-      updateFeed(mergedFeed.id, mergedFeed);
-    } else {
-      // Только если фид не существует, добавляем его
-      addFeed(mergedFeed);
-    }
-    
+    addFeed(mergedFeed);
     setCurrentFeed(mergedFeed.id);
-    navigate(`/feeds/${mergedFeed.id}`);
+    setPendingMergedFeed(mergedFeed);
+    navigate(`/feeds/${mergedFeed.id}?pendingMerge=1`);
   };
   
   // Обработчик отмены анализа дубликатов
@@ -513,6 +506,39 @@ const FeedImport = () => {
         onMergeComplete={handleDuplicatesMergeComplete}
         onCancel={handleDuplicatesCancel}
       />
+      
+      {/* Модалка подтверждения добавления фида */}
+      {showAddFeedModal && pendingFeedToAdd && (
+        <Modal
+          isOpen={showAddFeedModal}
+          onClose={() => setShowAddFeedModal(false)}
+          title="Добавить новый фид?"
+          size="md"
+          footer={
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowAddFeedModal(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Отмена</button>
+              <button
+                onClick={() => {
+                  addFeed(pendingFeedToAdd);
+                  setCurrentFeed(pendingFeedToAdd.id);
+                  setShowAddFeedModal(false);
+                  navigate(`/feeds/${pendingFeedToAdd.id}`);
+                }}
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Добавить
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-2">
+            <div><b>Название:</b> {pendingFeedToAdd.name}</div>
+            <div><b>Товаров:</b> {pendingFeedToAdd.products.length}</div>
+            <div><b>Категорий:</b> {pendingFeedToAdd.categories.length}</div>
+            <div><b>URL:</b> {pendingFeedToAdd.metadata?.url || '—'}</div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
