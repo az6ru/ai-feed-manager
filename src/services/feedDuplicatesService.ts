@@ -382,6 +382,9 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
     masterProduct.mergedFromVariants = variants.length;
     masterProduct.mergedAttributes = attributesToMerge;
     
+    // --- ДОБАВЛЯЕМ merged_external_ids ---
+    masterProduct.merged_external_ids = Array.from(new Set(variants.map(v => v.externalId)));
+    
     // Сохраняем информацию о размерах в явном виде для интерфейса
     if (sizeValues.length > 0) {
       masterProduct.mergedSizes = sizeValues;
@@ -399,7 +402,10 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
   feed.products.forEach(product => {
     const url = product.url || product.generatedUrl || '';
     if (!url || !processedUrls.has(url)) {
-      mergedProducts.push({ ...product });
+      mergedProducts.push({
+        ...product,
+        merged_external_ids: [product.externalId],
+      });
     }
   });
   

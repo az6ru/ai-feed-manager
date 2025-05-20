@@ -334,4 +334,26 @@ export async function deleteProduct(productId: string) {
     .eq('id', productId);
   if (error) throw error;
   return true;
+}
+
+// --- BATCH INSERT ---
+export async function batchInsertProducts(products: any[], feedId: string) {
+  const BATCH_SIZE = 1000;
+  for (let i = 0; i < products.length; i += BATCH_SIZE) {
+    const batch = products.slice(i, i + BATCH_SIZE).map(p => {
+      const { externalId, ...rest } = p;
+      return { ...toSnakeCase(rest), feed_id: feedId, external_id: externalId };
+    });
+    const { error } = await supabase.from('products').insert(batch);
+    if (error) throw error;
+  }
+}
+
+export async function batchInsertCategories(categories: any[], feedId: string) {
+  const BATCH_SIZE = 1000;
+  for (let i = 0; i < categories.length; i += BATCH_SIZE) {
+    const batch = categories.slice(i, i + BATCH_SIZE).map(c => ({ ...toSnakeCase(c), feed_id: feedId }));
+    const { error } = await supabase.from('categories').insert(batch);
+    if (error) throw error;
+  }
 } 

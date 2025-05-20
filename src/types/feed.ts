@@ -1,5 +1,6 @@
 export interface Product {
-  id: string;
+  id: string; // внутренний UUID
+  externalId: string; // внешний id из фида
   name: string;
   description: string; // Описание всегда строка (нормализовано)
   price: number;
@@ -9,7 +10,7 @@ export interface Product {
   url?: string;
   generatedUrl?: string;
   includeInExport?: boolean;
-  picture: string[]; // Фото всегда массив строк (нормализовано)
+  pictures: string[]; // Фото всегда массив строк (нормализовано)
   vendor?: string;
   vendorCode?: string;
   available: boolean;

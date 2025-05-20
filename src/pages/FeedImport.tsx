@@ -291,21 +291,31 @@ const FeedImport = () => {
   // Функция применения маппинга ко всем товарам
   function applyMappingToProducts(feed: Feed, mapping: Record<string, string>): Feed {
     const newProducts = feed.products.map((prod) => {
-      // Берём rawOffer (исходный оффер), если есть, иначе сам Product
       const raw = prod.rawOffer || prod;
       const mapped: any = { ...prod };
       Object.entries(mapping).forEach(([productField, offerField]) => {
         if (offerField && raw[offerField] !== undefined) {
-          mapped[productField] = raw[offerField];
+          // Автоматическое сопоставление picture → pictures
+          if (productField === 'pictures' && offerField === 'picture') {
+            mapped.pictures = Array.isArray(raw.picture) ? raw.picture : [raw.picture];
+          } else {
+            mapped[productField] = raw[offerField];
+          }
         }
       });
+      // Если не замаплено явно, но есть raw.picture, то pictures = [raw.picture]
+      if (!mapped.pictures && raw.picture) {
+        mapped.pictures = Array.isArray(raw.picture) ? raw.picture : [raw.picture];
+      }
+      // Удаляем rawOffer перед сохранением в Supabase
+      if ('rawOffer' in mapped) delete mapped.rawOffer;
       return mapped;
     });
     return { ...feed, products: newProducts };
   }
   
   const productFields = [
-    "name", "description", "price", "oldPrice", "currency", "categoryId", "url", "picture", "available", "vendor", "vendorCode"
+    "name", "description", "price", "oldPrice", "currency", "categoryId", "url", "pictures", "available", "vendor", "vendorCode"
   ];
 
   function autoMapping(exampleOffer: Record<string, any>): Record<string, string> {
@@ -318,7 +328,7 @@ const FeedImport = () => {
       currency: ["currency", "currencyId", "currency_id"],
       categoryId: ["categoryId", "category_id"],
       url: ["url"],
-      picture: ["picture", "image", "images"],
+      pictures: ["picture", "pictures", "image", "images"],
       available: ["available", "@_available"],
       vendor: ["vendor", "brand"],
       vendorCode: ["vendorCode", "vendor_code", "article"],

@@ -65,30 +65,29 @@ function diffProducts(
   options?: UpdateOptions,
   mergedIdMap?: Record<string, string>
 ): ProductDiff[] {
-  const oldMap: Record<string, Product> = Object.fromEntries(oldProducts.map((p) => [p.id, p]));
-  const newMap: Record<string, Product> = Object.fromEntries(newProducts.map((p) => [p.id, p]));
+  // Используем externalId как ключ!
+  const oldMap: Record<string, Product> = Object.fromEntries(oldProducts.map((p) => [p.externalId, p]));
+  const newMap: Record<string, Product> = Object.fromEntries(newProducts.map((p) => [p.externalId, p]));
   const diffs: ProductDiff[] = [];
   const opts = options || defaultUpdateOptions;
 
-  // Новые товары
-  for (const id in newMap) {
-    // Если игнорируем объединённые id и id есть в mergedIdMap — не считаем новым
-    if (opts.ignoreMerged && mergedIdMap && mergedIdMap[id]) continue;
-    if (!oldMap[id]) {
+  // Новые товары и изменения
+  for (const externalId in newMap) {
+    if (opts.ignoreMerged && mergedIdMap && mergedIdMap[externalId]) continue;
+    if (!oldMap[externalId]) {
       if (opts.addNew) {
-        diffs.push({ id, type: 'new', newProduct: newMap[id] });
+        diffs.push({ id: externalId, type: 'new', newProduct: newMap[externalId] });
       }
       continue;
     }
-    const oldP = oldMap[id];
-    const newP = newMap[id];
+    const oldP = oldMap[externalId];
+    const newP = newMap[externalId];
     const changedFields: Record<string, { old: any; new: any }> = {};
     if (opts.price && oldP.price !== newP.price) changedFields.price = { old: oldP.price, new: newP.price };
     if (opts.available && Boolean(oldP.available) !== Boolean(newP.available)) changedFields.available = { old: oldP.available, new: newP.available };
     if (opts.name && oldP.name !== newP.name) changedFields.name = { old: oldP.name, new: newP.name };
     if (opts.description && oldP.description !== newP.description) changedFields.description = { old: oldP.description, new: newP.description };
     if (opts.attributes) {
-      // Сравниваем только по именам и значениям атрибутов
       const oldAttrs = (oldP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
       const newAttrs = (newP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
       if (oldAttrs !== newAttrs) {
@@ -96,7 +95,7 @@ function diffProducts(
       }
     }
     if (Object.keys(changedFields).length > 0) {
-      diffs.push({ id, type: 'changed', changedFields, oldProduct: oldP, newProduct: newP });
+      diffs.push({ id: externalId, type: 'changed', changedFields, oldProduct: oldP, newProduct: newP });
     }
   }
   return diffs;
@@ -398,8 +397,10 @@ const FeedEditor = () => {
     return currentFeed.products.filter(product => {
       const query = searchQuery.trim().toLowerCase();
       if (!query && availabilityFilter === null && selectedVendors.length === 0 && exportFilter === null && Object.values(attributeFilters).every(arr => arr.length === 0)) return true;
-      // Поиск по id (точное и частичное совпадение)
+      // Поиск по id (UUID)
       const matchesId = product.id && product.id.toLowerCase().includes(query);
+      // Поиск по externalId
+      const matchesExternalId = product.externalId && product.externalId.toLowerCase().includes(query);
       // Поиск по vendor
       const matchesVendorSearch = product.vendor && product.vendor.toLowerCase().includes(query);
       // Поиск по url
@@ -408,7 +409,7 @@ const FeedEditor = () => {
       // Поиск по name, vendorCode
       const matchesName = product.name && product.name.toLowerCase().includes(query);
       const matchesVendorCode = product.vendorCode && product.vendorCode.toLowerCase().includes(query);
-      const matchesSearch = !query || matchesId || matchesVendorSearch || matchesUrl || matchesName || matchesVendorCode;
+      const matchesSearch = !query || matchesId || matchesExternalId || matchesVendorSearch || matchesUrl || matchesName || matchesVendorCode;
       // Фильтр по доступности
       const matchesAvailability = availabilityFilter === null || product.available === availabilityFilter;
       // Фильтр по vendor (множественный выбор)
@@ -714,7 +715,7 @@ const FeedEditor = () => {
   
   // Обработчик для открытия модального окна с изображением
   const handleOpenImageModal = (imageUrl: string, product: Product) => {
-    const imageIndex = product.picture?.indexOf(imageUrl) ?? 0;
+    const imageIndex = product.pictures?.indexOf(imageUrl) ?? 0;
     setCurrentModalImageIndex(imageIndex);
     setCurrentImage(imageUrl);
     setCurrentProduct(product);
@@ -730,23 +731,23 @@ const FeedEditor = () => {
 
   // Функция для навигации между изображениями в модальном окне
   const navigateModalImages = (direction: 'prev' | 'next') => {
-    if (!currentProduct || !currentProduct.picture || currentProduct.picture.length <= 1) return;
+    if (!currentProduct || !currentProduct.pictures || currentProduct.pictures.length <= 1) return;
 
     let newIndex = currentModalImageIndex;
     if (direction === 'next') {
-      newIndex = (currentModalImageIndex + 1) % currentProduct.picture.length;
+      newIndex = (currentModalImageIndex + 1) % currentProduct.pictures.length;
     } else {
-      newIndex = (currentModalImageIndex - 1 + currentProduct.picture.length) % currentProduct.picture.length;
+      newIndex = (currentModalImageIndex - 1 + currentProduct.pictures.length) % currentProduct.pictures.length;
     }
     
     setCurrentModalImageIndex(newIndex);
-    setCurrentImage(currentProduct.picture[newIndex]);
+    setCurrentImage(currentProduct.pictures[newIndex]);
   };
 
   // Функция для показа миниатюры изображения
   const renderProductImage = (product: Product) => {
-    if (product.picture && product.picture.length > 0) {
-      const mainImage = product.picture[0];
+    if (product.pictures && product.pictures.length > 0) {
+      const mainImage = product.pictures[0];
       return (
         <div className="flex items-center">
           <div 
@@ -764,12 +765,12 @@ const FeedEditor = () => {
                 (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNFNUU3RUIiLz48cGF0aCBkPSJNNDMuNzUgNTguNUw1NC4yNSA2OUg2Mi4yNUw0OC43NSA0OS41TDQzLjc1IDU4LjVaIiBmaWxsPSIjOTRBM0IzIi8+PHBhdGggZD0iTTMxIDY5TDQzLjc1IDQ3LjVMNTYuNSA2OUgzMVoiIGZpbGw9IiM5NEEzQjMiLz48Y2lyY2xlIGN4PSI2NCIgY3k9IjM2IiByPSI1IiBmaWxsPSIjOTRBM0IzIi8+PC9zdmc+';
               }}
             />
-            {product.picture.length > 1 && (
+            {product.pictures.length > 1 && (
               <div 
                 className="absolute bottom-0 right-0 p-0.5 bg-gray-800 text-white text-xs rounded-tl-md"
                 onClick={(e) => e.stopPropagation()} // Предотвращаем всплытие события клика
               >
-                +{product.picture.length - 1}
+                +{product.pictures.length - 1}
               </div>
             )}
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
@@ -1753,8 +1754,8 @@ const FeedEditor = () => {
                         <div className="text-sm font-medium text-gray-900 break-words line-clamp-2">
                       {product.name}
                     </div>
-                        <div className="text-xs text-gray-500 break-words">
-                      ID: {product.id}
+                        <div className="text-xs text-blue-700 break-words">
+                      External ID: {product.externalId}
                     </div>
                   </td>
                       <td className="px-3 py-3 whitespace-nowrap">
@@ -2013,7 +2014,7 @@ const FeedEditor = () => {
           fieldSelection={fieldSelection}
         />
       )}
-      {showImageModal && currentProduct && currentProduct.picture && currentProduct.picture.length > 0 && (
+      {showImageModal && currentProduct && currentProduct.pictures && currentProduct.pictures.length > 0 && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-80 flex items-center justify-center p-4">
           {/* Модальное окно для просмотра изображений */}
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full overflow-hidden">
@@ -2024,7 +2025,7 @@ const FeedEditor = () => {
                 {currentProduct.name}
               </h3>
                 <p className="text-sm text-gray-500">
-                  Изображение {currentModalImageIndex + 1} из {currentProduct.picture?.length}
+                  Изображение {currentModalImageIndex + 1} из {currentProduct.pictures?.length}
                 </p>
               </div>
                 <button
@@ -2038,13 +2039,13 @@ const FeedEditor = () => {
             {/* Область с изображением */}
             <div className="relative bg-gray-100 h-[calc(100vh-20rem)] flex items-center justify-center p-4">
                   <img 
-                src={currentProduct.picture[currentModalImageIndex]} 
+                src={currentProduct.pictures[currentModalImageIndex]} 
                     alt={currentProduct.name}
                 className="max-h-full max-w-full object-contain"
               />
               
               {/* Кнопки навигации для листания изображений */}
-              {currentProduct.picture.length > 1 && (
+              {currentProduct.pictures.length > 1 && (
                 <>
                   <button
                     onClick={() => navigateModalImages('prev')}
@@ -2056,7 +2057,7 @@ const FeedEditor = () => {
                   <button
                     onClick={() => navigateModalImages('next')}
                     className="absolute right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 focus:outline-none transition-opacity"
-                    disabled={currentModalImageIndex === currentProduct.picture.length - 1}
+                    disabled={currentModalImageIndex === currentProduct.pictures.length - 1}
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>
@@ -2065,10 +2066,10 @@ const FeedEditor = () => {
                 </div>
                 
             {/* Превью всех изображений продукта */}
-            {currentProduct.picture.length > 1 && (
+            {currentProduct.pictures.length > 1 && (
               <div className="p-4 bg-white border-t">
                 <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2">
-                  {currentProduct.picture.map((imgUrl, index) => (
+                  {currentProduct.pictures.map((imgUrl, index) => (
                     <button
                           key={index}
                       onClick={() => setCurrentModalImageIndex(index)}

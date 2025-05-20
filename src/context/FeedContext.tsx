@@ -1,6 +1,23 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Feed, Product } from '../types/feed';
 import { parseFeedFromXml, processLargeYmlFile } from '../services/ymlParser';
+import { useAuth } from './AuthContext';
+import {
+  getFeeds,
+  createFeed,
+  updateFeed as updateFeedSupabase,
+  deleteFeed as deleteFeedSupabase,
+  getProducts,
+  createProduct,
+  updateProduct as updateProductSupabase,
+  deleteProduct as deleteProductSupabase,
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  batchInsertProducts,
+  batchInsertCategories
+} from '../services/supabaseClient';
 
 interface FeedContextProps {
   feeds: Feed[];
@@ -13,206 +30,87 @@ interface FeedContextProps {
   setCurrentFeed: (id: string | null) => void;
   importFeedFromXml: (xml: string, name: string, sourceUrl?: string) => Promise<Feed>;
   importLargeFeedFromXml: (xml: string, name: string, onProgress?: (processed: number, total: number) => void, sourceUrl?: string) => Promise<Feed>;
-  updateProduct: (feedId: string, productId: string, updates: Partial<Product>) => void;
-  updateProducts: (feedId: string, productIds: string[], updates: Partial<Product>) => void;
+  updateProduct: (feedId: string, productExternalId: string, updates: Partial<Product>) => void;
+  updateProducts: (feedId: string, productExternalIds: string[], updates: Partial<Product>) => void;
 }
 
 const FeedContext = createContext<FeedContextProps | undefined>(undefined);
 
 export function FeedProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [currentFeed, setCurrentFeedState] = useState<Feed | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load feeds from localStorage on init
+  // Загрузка фидов из Supabase при инициализации и смене пользователя
   useEffect(() => {
-    try {
-      // Пробуем загрузить метаданные фидов
-      const feedsMetadata = localStorage.getItem('ymlFeeds_metadata');
-      if (feedsMetadata) {
-        const parsedMetadata = JSON.parse(feedsMetadata);
-        
-        // Восстанавливаем полные данные фидов
-        const restoredFeeds = parsedMetadata.map((metaFeed: any) => {
-          // Загружаем продукты для этого фида, если они есть
-          let products: any[] = [];
-          try {
-            const feedProducts = localStorage.getItem(`ymlFeeds_products_${metaFeed.id}`);
-            if (feedProducts) {
-              products = JSON.parse(feedProducts);
-            }
-          } catch (err) {
-            console.warn(`Не удалось загрузить продукты для фида ${metaFeed.name}`);
-          }
-          
-          // Загружаем категории для этого фида, если они есть
-          let categories: any[] = [];
-          try {
-            const feedCategories = localStorage.getItem(`ymlFeeds_categories_${metaFeed.id}`);
-            if (feedCategories) {
-              categories = JSON.parse(feedCategories);
-            }
-          } catch (err) {
-            console.warn(`Не удалось загрузить категории для фида ${metaFeed.name}`);
-          }
-          
-          // Восстанавливаем полную структуру фида
-          return {
-            ...metaFeed,
-            products: products || [],
-            categories: categories || []
-          };
-        });
-        
-        setFeeds(restoredFeeds);
-      } else {
-        // Пробуем загрузить по старому пути для совместимости
-        const savedFeeds = localStorage.getItem('ymlFeeds');
-        if (savedFeeds) {
-          setFeeds(JSON.parse(savedFeeds));
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load feeds from localStorage', err);
-    }
-  }, []);
-
-  // Save feeds to localStorage when they change
-  useEffect(() => {
-    try {
-      // Проверяем размер данных перед сохранением
-      const feedsToSave = [...feeds];
-      
-      // Функция для очистки фида от лишних данных
-      const simplifyFeed = (feed: Feed) => {
-        // Сохраняем только настройки AI и минимально необходимые данные
-        const simplifiedFeed = {
-          id: feed.id,
-          name: feed.name,
-          createdAt: feed.createdAt,
-          source: feed.source,
-          aiSettings: feed.aiSettings, // Обязательно сохраняем настройки AI
-          metadata: feed.metadata,
-          // Ограничиваем количество продуктов для хранения
-          products: feed.products.slice(0, 10).map(product => ({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            available: product.available,
-            categoryId: product.categoryId,
-            currency: product.currency,
-            // Исключаем изображения и длинные описания
-            generatedName: product.generatedName,
-            generatedDescription: product.generatedDescription?.substring(0, 100), // Ограничиваем длину описания
-            // Минимальный набор атрибутов
-            attributes: product.attributes.slice(0, 3)
-          })),
-          // Сохраняем только основные категории
-          categories: feed.categories.slice(0, 10)
-        };
-        
-        return simplifiedFeed;
-      };
-      
-      // Пробуем сохранить упрощенную версию
-      try {
-        const simplifiedFeeds = feedsToSave.map(simplifyFeed);
-        
-        // Разделяем данные для хранения на более мелкие части
-        // Сохраняем только базовую информацию о фидах 
-        const feedsMetadata = simplifiedFeeds.map(feed => ({
-          id: feed.id,
-          name: feed.name,
-          createdAt: feed.createdAt,
-          source: feed.source,
-          aiSettings: feed.aiSettings, // Важно - сохраняем настройки AI
-          metadata: feed.metadata
-        }));
-        
-        // Сохраняем метаданные фидов
-        localStorage.setItem('ymlFeeds_metadata', JSON.stringify(feedsMetadata));
-        
-        // Сохраняем продукты каждого фида отдельно
-        simplifiedFeeds.forEach((feed, index) => {
-          try {
-            localStorage.setItem(`ymlFeeds_products_${feed.id}`, JSON.stringify(feed.products));
-          } catch (err) {
-            console.warn(`Не удалось сохранить продукты для фида ${feed.name}, слишком большой объем данных`);
-          }
-        });
-        
-        // Сохраняем категории каждого фида отдельно
-        simplifiedFeeds.forEach((feed, index) => {
-          try {
-            localStorage.setItem(`ymlFeeds_categories_${feed.id}`, JSON.stringify(feed.categories));
-          } catch (err) {
-            console.warn(`Не удалось сохранить категории для фида ${feed.name}, слишком большой объем данных`);
-          }
-        });
-        
-        console.log('Feeds saved to localStorage (optimized version)');
-      } catch (storageError) {
-        console.warn('Failed to save even simplified feeds, storage quota exceeded. Saving only feed metadata without products.');
-        
-        // Сохраняем только метаданные фидов без продуктов
-        const metadataOnly = feedsToSave.map(feed => ({
-          id: feed.id,
-          name: feed.name,
-          createdAt: feed.createdAt,
-          source: feed.source,
-          aiSettings: feed.aiSettings // Важно - сохраняем настройки AI
-        }));
-        
-        localStorage.setItem('ymlFeeds_metadata_only', JSON.stringify(metadataOnly));
-      }
-    } catch (err) {
-      console.error('Error saving feeds to localStorage', err);
-    }
-  }, [feeds]);
-
-  const addFeed = (feed: Feed) => {
-    setFeeds(prevFeeds => {
-      if (prevFeeds.some(f => f.id === feed.id)) {
-        // Уже есть такой фид — не добавляем!
-        return prevFeeds;
-      }
-      return [...prevFeeds, feed];
-    });
-  };
-
-  const updateFeed = (id: string, updatedFeed: Partial<Feed>) => {
-    console.log('updateFeed вызван с ID:', id);
-    console.log('Обновляемые данные фида:', updatedFeed);
-    console.log('AI настройки в обновлении:', updatedFeed.aiSettings);
-    
-    setFeeds(prevFeeds => 
-      prevFeeds.map(feed => {
-        if (feed.id === id) {
-          const updated = { ...feed, ...updatedFeed };
-          console.log('Обновленный фид:', updated);
-          console.log('AI настройки после обновления:', updated.aiSettings);
-          return updated;
-        }
-        return feed;
+    if (!user) return;
+    setIsLoading(true);
+    getFeeds(user.id)
+      .then(async (feedsFromDb) => {
+        // Для каждого фида подтягиваем продукты и категории
+        const feedsWithData = await Promise.all(
+          feedsFromDb.map(async (feed: any) => {
+            const [products, categories] = await Promise.all([
+              getProducts(feed.id),
+              getCategories(feed.id)
+            ]);
+            return { ...feed, products, categories };
+          })
+        );
+        setFeeds(feedsWithData);
       })
-    );
-    
-    if (currentFeed?.id === id) {
-      setCurrentFeedState(prev => {
-        if (!prev) return prev;
-        const updated = { ...prev, ...updatedFeed };
-        console.log('Обновленный текущий фид:', updated);
-        console.log('AI настройки текущего фида после обновления:', updated.aiSettings);
-        return updated;
-      });
+      .catch((err) => setError(err.message || 'Ошибка загрузки фидов'))
+      .finally(() => setIsLoading(false));
+  }, [user]);
+
+  // --- CRUD фидов ---
+  const addFeed = async (feed: Feed) => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      // Исключаем products и categories из объекта для Supabase
+      const { products = [], categories = [], ...feedData } = feed;
+      const created = await createFeed({ ...feedData, userId: user.id });
+      // Батчем категории
+      await batchInsertCategories(categories, created.id);
+      // Батчем продукты
+      await batchInsertProducts(products, created.id);
+      setFeeds(prev => [...prev, { ...created, products, categories }]);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при добавлении фида');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const deleteFeed = (id: string) => {
-    setFeeds(prevFeeds => prevFeeds.filter(feed => feed.id !== id));
-    if (currentFeed?.id === id) {
-      setCurrentFeedState(null);
+  const updateFeed = async (id: string, updatedFeed: Partial<Feed>) => {
+    setIsLoading(true);
+    try {
+      // Исключаем products и categories из объекта для Supabase
+      const { products, categories, ...feedData } = updatedFeed;
+      const updated = await updateFeedSupabase(id, feedData);
+      setFeeds(prev => prev.map(f => f.id === id ? { ...f, ...updated } : f));
+      if (currentFeed?.id === id) setCurrentFeedState(prev => prev ? { ...prev, ...updated } : prev);
+      // (опционально) можно реализовать обновление продуктов и категорий отдельно
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при обновлении фида');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteFeed = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await deleteFeedSupabase(id);
+      setFeeds(prev => prev.filter(f => f.id !== id));
+      if (currentFeed?.id === id) setCurrentFeedState(null);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при удалении фида');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -221,9 +119,58 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       setCurrentFeedState(null);
       return;
     }
-    
     const feed = feeds.find(f => f.id === id) || null;
     setCurrentFeedState(feed);
+  };
+
+  // --- CRUD продуктов ---
+  const updateProduct = async (feedId: string, productExternalId: string, updates: Partial<Product>) => {
+    setIsLoading(true);
+    try {
+      // Находим продукт по externalId
+      const product = feeds.find(f => f.id === feedId)?.products.find(p => p.externalId === productExternalId);
+      if (!product) throw new Error('Product not found');
+      const updated = await updateProductSupabase(product.id, updates);
+      setFeeds(prev => prev.map(feed =>
+        feed.id !== feedId ? feed : {
+          ...feed,
+          products: feed.products.map(p => p.externalId === productExternalId ? { ...p, ...updated } : p)
+        }
+      ));
+      if (currentFeed?.id === feedId) setCurrentFeedState(prev => prev ? {
+        ...prev,
+        products: prev.products.map(p => p.externalId === productExternalId ? { ...p, ...updates } : p)
+      } : prev);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при обновлении товара');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProducts = async (feedId: string, productExternalIds: string[], updates: Partial<Product>) => {
+    setIsLoading(true);
+    try {
+      // Находим id всех продуктов по externalId
+      const feed = feeds.find(f => f.id === feedId);
+      if (!feed) throw new Error('Feed not found');
+      const ids = feed.products.filter(p => productExternalIds.includes(p.externalId)).map(p => p.id);
+      await Promise.all(ids.map(id => updateProductSupabase(id, updates)));
+      setFeeds(prev => prev.map(feed =>
+        feed.id !== feedId ? feed : {
+          ...feed,
+          products: feed.products.map(p => productExternalIds.includes(p.externalId) ? { ...p, ...updates } : p)
+        }
+      ));
+      if (currentFeed?.id === feedId) setCurrentFeedState(prev => prev ? {
+        ...prev,
+        products: prev.products.map(p => productExternalIds.includes(p.externalId) ? { ...p, ...updates } : p)
+      } : prev);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при обновлении товаров');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const importFeedFromXml = async (xml: string, name: string, sourceUrl?: string) => {
@@ -271,68 +218,6 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       throw err;
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const updateProduct = (feedId: string, productId: string, updates: Partial<Product>) => {
-    setFeeds(prevFeeds => 
-      prevFeeds.map(feed => {
-        if (feed.id !== feedId) return feed;
-        
-        return {
-          ...feed,
-          products: feed.products.map(product => 
-            product.id === productId 
-              ? { ...product, ...updates } 
-              : product
-          )
-        };
-      })
-    );
-    
-    if (currentFeed?.id === feedId) {
-      setCurrentFeedState(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          products: prev.products.map(product => 
-            product.id === productId 
-              ? { ...product, ...updates } 
-              : product
-          )
-        };
-      });
-    }
-  };
-
-  const updateProducts = (feedId: string, productIds: string[], updates: Partial<Product>) => {
-    setFeeds(prevFeeds => 
-      prevFeeds.map(feed => {
-        if (feed.id !== feedId) return feed;
-        
-        return {
-          ...feed,
-          products: feed.products.map(product => 
-            productIds.includes(product.id) 
-              ? { ...product, ...updates } 
-              : product
-          )
-        };
-      })
-    );
-    
-    if (currentFeed?.id === feedId) {
-      setCurrentFeedState(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          products: prev.products.map(product => 
-            productIds.includes(product.id) 
-              ? { ...product, ...updates } 
-              : product
-          )
-        };
-      });
     }
   };
 

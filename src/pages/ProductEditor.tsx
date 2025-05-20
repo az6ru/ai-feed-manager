@@ -42,8 +42,8 @@ const ProductEditor = () => {
           if (foundProduct) {
             setProduct(foundProduct);
             // Set the first image as current if available
-            if (foundProduct.picture && foundProduct.picture.length > 0) {
-              setCurrentImage(foundProduct.picture[0]);
+            if (foundProduct.pictures && foundProduct.pictures.length > 0) {
+              setCurrentImage(foundProduct.pictures[0]);
             }
           } else {
             // Product not found, redirect
@@ -232,7 +232,7 @@ const ProductEditor = () => {
   };
   
   const handleOpenModal = (imageSrc: string) => {
-    const imageIndex = product.picture?.indexOf(imageSrc) ?? 0;
+    const imageIndex = product.pictures?.indexOf(imageSrc) ?? 0;
     setCurrentModalImageIndex(imageIndex);
     setShowImageModal(true);
   };
@@ -242,13 +242,13 @@ const ProductEditor = () => {
   };
 
   const navigateModalImages = (direction: 'prev' | 'next') => {
-    if (!product || !product.picture || product.picture.length === 0) return;
+    if (!product || !product.pictures || product.pictures.length === 0) return;
 
     let newIndex = currentModalImageIndex;
     if (direction === 'next') {
-      newIndex = (currentModalImageIndex + 1) % product.picture.length;
+      newIndex = (currentModalImageIndex + 1) % product.pictures.length;
     } else {
-      newIndex = (currentModalImageIndex - 1 + product.picture.length) % product.picture.length;
+      newIndex = (currentModalImageIndex - 1 + product.pictures.length) % product.pictures.length;
     }
     setCurrentModalImageIndex(newIndex);
   };
@@ -276,34 +276,39 @@ const ProductEditor = () => {
       
       {/* Basic Information Card */}
       <Card title="Basic Information" className="mb-4 shadow-sm">
-        {/* ID товара */}
+        {/* Product ID (UUID) */}
         <Field 
-          label="ID товара" 
-          htmlFor="product-id"
+          label="Product ID (UUID)" 
+          htmlFor="uuid"
         >
           <input
             type="text"
-            id="product-id"
+            id="uuid"
             value={product.id}
             readOnly
             className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 cursor-default"
           />
         </Field>
-        {/* Объединённые ID */}
-        {currentFeed.metadata?.mergedIdMap && product.mergedFromVariants && Number(product.mergedFromVariants) > 1 && (
-          <Field 
-            label="Объединённые ID" 
-            htmlFor="merged-ids"
-          >
+        {/* External ID */}
+        <Field 
+          label="External ID" 
+          htmlFor="external-id"
+        >
+          <input
+            type="text"
+            id="external-id"
+            value={product.externalId}
+            readOnly
+            className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 cursor-default"
+          />
+        </Field>
+        {/* Связанные External ID (MERGE) */}
+        {Array.isArray(product.merged_external_ids) && product.merged_external_ids.length > 0 && (
+          <Field label="Связанные External ID (MERGE)" htmlFor="merged-external-ids">
             <input
+              id="merged-external-ids"
               type="text"
-              id="merged-ids"
-              value={(() => {
-                const mergedIds = Object.entries(currentFeed.metadata.mergedIdMap)
-                  .filter(([_, masterId]) => masterId === product.id)
-                  .map(([variantId]) => variantId);
-                return mergedIds.length > 0 ? mergedIds.join(', ') : '—';
-              })()}
+              value={Array.from(new Set(product.merged_external_ids)).join(', ')}
               readOnly
               className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 cursor-default"
             />
@@ -419,7 +424,7 @@ const ProductEditor = () => {
       </Card>
       
       {/* Product Images Card */}
-      {product.picture && product.picture.length > 0 && (
+      {product.pictures && product.pictures.length > 0 && (
         <Card title="Product Images" className="mb-4 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-start md:gap-6">
             {/* Main Image Display */}
@@ -432,7 +437,7 @@ const ProductEditor = () => {
               }}
             >
               <img 
-                src={currentImage || product.picture[0]} 
+                src={currentImage || product.pictures[0]} 
                 alt={product.name}
                 className="max-h-full max-w-full object-contain"
                 onError={(e) => {
@@ -449,14 +454,14 @@ const ProductEditor = () => {
             </div>
 
             {/* Thumbnails Grid */}
-            {product.picture.length > 1 && (
+            {product.pictures.length > 1 && (
               <div className="w-full md:w-1/3">
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {product.picture.map((img, idx) => (
+                  {product.pictures.map((img, idx) => (
                     <div 
                       key={idx}
                       className={`aspect-square cursor-pointer border-2 rounded-md overflow-hidden transition-all duration-150 ease-in-out ${
-                        img === (currentImage || product.picture?.[0]) 
+                        img === (currentImage || product.pictures?.[0]) 
                           ? 'border-blue-500 ring-2 ring-blue-200' 
                           : 'border-gray-200 hover:border-blue-400'
                       }`}
@@ -860,7 +865,7 @@ const ProductEditor = () => {
       )}
       
       {/* Fullscreen Image Modal */}
-      {showImageModal && product && product.picture && product.picture.length > 0 && (
+      {showImageModal && product && product.pictures && product.pictures.length > 0 && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 p-4"
           onClick={handleCloseModal} 
@@ -872,7 +877,7 @@ const ProductEditor = () => {
             {/* Header with close button */}
             <div className="p-3 flex justify-between items-center border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
-                {product.name} - Изображение {currentModalImageIndex + 1} из {product.picture.length}
+                {product.name} - Изображение {currentModalImageIndex + 1} из {product.pictures.length}
               </h3>
               <Button
                 onClick={handleCloseModal} 
@@ -887,7 +892,7 @@ const ProductEditor = () => {
             
             {/* Main image container */}
             <div className="relative flex items-center justify-center overflow-hidden p-2">
-              {product.picture.length > 1 && (
+              {product.pictures.length > 1 && (
                 <>
                   <Button
                     onClick={() => navigateModalImages('prev')}
@@ -908,17 +913,17 @@ const ProductEditor = () => {
               )}
               
               <img 
-                src={product.picture?.[currentModalImageIndex] || ''}
+                src={product.pictures?.[currentModalImageIndex] || ''}
                 alt={`Product image ${currentModalImageIndex + 1}`}
                 className="max-w-full max-h-full object-contain"
               />
             </div>
             
             {/* Thumbnails container */}
-            {product.picture.length > 1 && (
+            {product.pictures.length > 1 && (
               <div className="p-3 border-t border-gray-200 h-28 overflow-y-auto bg-gray-50">
                 <div className="grid grid-flow-col auto-cols-max gap-2 overflow-x-auto px-2 justify-start">
-                  {product.picture.map((img, idx) => (
+                  {product.pictures.map((img, idx) => (
                     <div
                       key={`modal-thumb-${idx}`}
                       className={`w-16 h-16 cursor-pointer border-2 rounded-md overflow-hidden transition-all duration-150 ease-in-out ${

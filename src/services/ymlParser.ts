@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { Feed, Product, Category, FeedMetadata } from '../types/feed';
+import { supabase } from './supabaseClient';
 
 /**
  * Парсит YML-фид из XML строки
@@ -205,77 +206,47 @@ export async function parseFeedFromXml(xmlContent: string, feedName: string, sou
 /**
  * Извлекает категории из различных структур shop
  */
+function isValidUUID(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+}
+
 function extractCategories(shop: any): Category[] {
   console.log('Извлечение категорий...');
-  
   let rawCategories: any[] = [];
-  
-  // Проверяем стандартную структуру
   if (shop.categories?.category) {
     rawCategories = shop.categories.category;
     console.log(`Найдено ${rawCategories.length} категорий в shop.categories.category`);
-  } 
-  // Проверяем если categories это массив
-  else if (shop.categories && Array.isArray(shop.categories)) {
+  } else if (shop.categories && Array.isArray(shop.categories)) {
     rawCategories = shop.categories;
     console.log(`Найдено ${rawCategories.length} категорий в shop.categories (массив)`);
-  } 
-  // Проверяем если categories это объект
-  else if (shop.categories && typeof shop.categories === 'object') {
-    // Ищем category внутри
-    const categoryKeys = Object.keys(shop.categories).filter(key => 
-      Array.isArray(shop.categories[key]) || 
+  } else if (shop.categories && typeof shop.categories === 'object') {
+    const categoryKeys = Object.keys(shop.categories).filter(key =>
+      Array.isArray(shop.categories[key]) ||
       key.toLowerCase().includes('category') ||
       key.toLowerCase().includes('категор')
     );
-    
     if (categoryKeys.length > 0) {
       const key = categoryKeys[0];
       console.log(`Найдены потенциальные категории в shop.categories.${key}`);
-      rawCategories = Array.isArray(shop.categories[key]) 
-        ? shop.categories[key] 
+      rawCategories = Array.isArray(shop.categories[key])
+        ? shop.categories[key]
         : [shop.categories[key]];
     } else {
-      // Если категорий внутри не нашли, используем сам объект
       rawCategories = [shop.categories];
     }
-  }
-  // Ищем categories напрямую в shop
-  else if (shop.category) {
+  } else if (shop.category) {
     rawCategories = Array.isArray(shop.category) ? shop.category : [shop.category];
     console.log(`Найдено ${rawCategories.length} категорий напрямую в shop.category`);
   }
-  
-  // Если после всех проверок категорий нет
   if (rawCategories.length === 0) {
     console.log('Категории не найдены');
     return [];
   }
-  
-  // Преобразуем в структуру Category
   return rawCategories
-    .filter(Boolean) // Отбрасываем null/undefined
+    .filter(Boolean)
     .map((cat: any) => {
-      // Поддержка строкового формата категорий
-      if (typeof cat === 'string') {
-        return {
-          id: generateId(),
-          name: cat,
-        };
-      }
-      
-      // Логгируем для отладки
-      if (rawCategories.length < 5) {
-        console.log('Пример категории:', JSON.stringify(cat));
-      }
-      
-      // Извлекаем ID категории
-      let id = '';
-      if (cat['@_id']) id = cat['@_id'];
-      else if (cat.id) id = cat.id;
-      else id = generateId();
-      
-      // Извлекаем имя категории
+      let id = cat['@_id'] || cat.id || generateId();
+      if (!isValidUUID(id)) id = generateId();
       let name = '';
       if (cat['#text']) name = cat['#text'];
       else if (cat._) name = cat._;
@@ -283,13 +254,11 @@ function extractCategories(shop: any): Category[] {
       else if (cat.title) name = cat.title;
       else if (cat.text) name = cat.text;
       else name = `Категория ${id}`;
-      
-      // Извлекаем родительскую категорию
       let parentId = undefined;
       if (cat['@_parentId']) parentId = cat['@_parentId'];
       else if (cat.parentId) parentId = cat.parentId;
       else if (cat.parent_id) parentId = cat.parent_id;
-      
+      if (parentId && !isValidUUID(parentId)) parentId = undefined;
       return {
         id: String(id),
         name: String(name),
@@ -303,10 +272,7 @@ function extractCategories(shop: any): Category[] {
  */
 function extractProducts(shop: any): Product[] {
   console.log('Извлечение товаров...');
-  
   let rawProducts: any[] = [];
-  
-  // Пытаемся найти товары в разных структурах
   if (shop.offers?.offer) {
     rawProducts = shop.offers.offer;
   } else if (shop.offers) {
@@ -316,9 +282,8 @@ function extractProducts(shop: any): Product[] {
   } else if (shop.products?.product) {
     rawProducts = shop.products.product;
   } else {
-    // Последняя попытка - ищем на верхнем уровне
     for (const key in shop) {
-      if (Array.isArray(shop[key]) && shop[key].length > 0 && 
+      if (Array.isArray(shop[key]) && shop[key].length > 0 &&
           shop[key][0] && typeof shop[key][0] === 'object' &&
           (shop[key][0].price || shop[key][0].name || shop[key][0].title)) {
         rawProducts = shop[key];
@@ -327,13 +292,9 @@ function extractProducts(shop: any): Product[] {
       }
     }
   }
-  
   if (rawProducts.length === 0) {
     console.log('Товары не найдены в стандартных местах, выполняем глубокий поиск...');
-    
-    // Рекурсивный поиск в объекте
     const findProducts = (obj: any, path: string = ''): any[] | null => {
-      // Если это массив и первый элемент похож на товар
       if (Array.isArray(obj) && obj.length > 0 && typeof obj[0] === 'object') {
         const sample = obj[0];
         if (sample.price || sample.name || sample.title || sample.id) {
@@ -341,8 +302,6 @@ function extractProducts(shop: any): Product[] {
           return obj;
         }
       }
-      
-      // Рекурсивный обход объекта
       if (obj && typeof obj === 'object') {
         for (const key in obj) {
           if (obj[key] && typeof obj[key] === 'object') {
@@ -351,32 +310,24 @@ function extractProducts(shop: any): Product[] {
           }
         }
       }
-      
       return null;
     };
-    
-    // Ищем в корне объекта
     const foundProducts = findProducts(shop);
     if (foundProducts) {
       rawProducts = foundProducts;
     }
   }
-  
   if (rawProducts.length === 0) {
     console.log('Товары не найдены');
     return [];
   }
-  
   console.log(`Найдено ${rawProducts.length} товаров`);
-  
-  // Для отладки выводим пример товара
   if (rawProducts.length > 0) {
     console.log('Пример товара:', JSON.stringify(rawProducts[0]).substring(0, 500));
   }
-  
-  // Преобразуем в структуру Product
   return rawProducts.map((product: any) => {
-    // Извлекаем изображения
+    let id = generateId(); // внутренний UUID
+    let externalId = product['@_id'] || product.id || ''; // внешний id из фида
     let pictures: string[] = [];
     if (product.picture) {
       if (Array.isArray(product.picture)) {
@@ -391,11 +342,8 @@ function extractProducts(shop: any): Product[] {
     } else if (product.image) {
       pictures = [product.image].filter(Boolean);
     }
-    
-    // Извлекаем атрибуты
     let attributes: any[] = [];
     if (product.param) {
-      // Сохраняем оригинальный текст параметров для дальнейшей обработки
       if (Array.isArray(product.param)) {
         product.param.forEach((p: any) => {
           if (p && p['#text']) {
@@ -405,12 +353,10 @@ function extractProducts(shop: any): Product[] {
       } else if (product.param['#text']) {
         product.param.originalText = product.param['#text'];
       }
-      
-      attributes = Array.isArray(product.param) 
-        ? product.param.map(normalizeParam) 
+      attributes = Array.isArray(product.param)
+        ? product.param.map(normalizeParam)
         : [normalizeParam(product.param)];
     } else if (product.params) {
-      // Аналогичная обработка для params
       if (Array.isArray(product.params)) {
         product.params.forEach((p: any) => {
           if (p && p['#text']) {
@@ -420,12 +366,10 @@ function extractProducts(shop: any): Product[] {
       } else if (product.params['#text']) {
         product.params.originalText = product.params['#text'];
       }
-      
-      attributes = Array.isArray(product.params) 
-        ? product.params.map(normalizeParam) 
+      attributes = Array.isArray(product.params)
+        ? product.params.map(normalizeParam)
         : [normalizeParam(product.params)];
     } else if (product.attributes) {
-      // Аналогичная обработка для attributes
       if (Array.isArray(product.attributes)) {
         product.attributes.forEach((p: any) => {
           if (p && p['#text']) {
@@ -435,14 +379,13 @@ function extractProducts(shop: any): Product[] {
       } else if (product.attributes['#text']) {
         product.attributes.originalText = product.attributes['#text'];
       }
-      
-      attributes = Array.isArray(product.attributes) 
-        ? product.attributes.map(normalizeParam) 
+      attributes = Array.isArray(product.attributes)
+        ? product.attributes.map(normalizeParam)
         : [normalizeParam(product.attributes)];
     }
-    
     return {
-      id: product['@_id'] || product.id || generateId(),
+      id,
+      externalId,
       name: product.name || product.n || product.title || 'Unknown Product',
       description: normalizeDescription(product.description || product.desc || ''),
       price: parseFloat(product.price) || 0,
@@ -450,13 +393,13 @@ function extractProducts(shop: any): Product[] {
       currency: product.currencyId || product.currency || 'RUB',
       categoryId: product.categoryId || product.category_id || '',
       url: product.url || '',
-      picture: normalizePicture(product.picture),
+      pictures,
       available: normalizeAvailableStatus(product),
       attributes,
       vendor: product.vendor || product.brand || '',
       vendorCode: product.vendorCode || product.vendor_code || product.article || '',
-      includeInExport: true, // По умолчанию товар включен в выгрузку
-      rawOffer: product // <-- сохраняем исходный оффер
+      includeInExport: true,
+      rawOffer: product
     };
   });
 }
@@ -592,8 +535,8 @@ export function generateYmlFromFeed(feed: Feed): string {
       xml += `        <url>${escapeXml(productUrl)}</url>\n`;
     }
     
-    if (product.picture && product.picture.length > 0) {
-      product.picture.forEach(pic => {
+    if (product.pictures && product.pictures.length > 0) {
+      product.pictures.forEach(pic => {
         if (pic) {
           xml += `        <picture>${escapeXml(pic)}</picture>\n`;
         }
@@ -659,10 +602,8 @@ function escapeXml(unsafe: any): string {
 }
 
 function generateId(): string {
-  // Используем комбинацию временной метки и случайной строки для создания более уникальных ID
-  const timestamp = Date.now().toString(36);
-  const randomStr = Math.random().toString(36).substring(2, 10);
-  return `feed_${timestamp}_${randomStr}`;
+  // Теперь всегда возвращаем UUID v4 для совместимости с Supabase
+  return uuidv4();
 }
 
 // Добавим функцию для обработки больших файлов
@@ -810,7 +751,8 @@ export async function processLargeYmlFile(
         }
         
         return {
-          id: offer['@_id'] || offer.id || generateId(),
+          id: generateId(), // внутренний UUID
+          externalId: offer['@_id'] || offer.id || '', // внешний id из фида
           name: offer.name || offer.n || offer.title || 'Unknown Product',
           description: normalizeDescription(offer.description || offer.desc || ''),
           price: parseFloat(offer.price) || 0,
@@ -818,7 +760,7 @@ export async function processLargeYmlFile(
           currency: offer.currencyId || offer.currency || 'RUB',
           categoryId: offer.categoryId || offer.category_id || '',
           url: offer.url || '',
-          picture: normalizePicture(offer.picture),
+          pictures: normalizePicture(offer.picture),
           vendor: offer.vendor || offer.brand || '',
           vendorCode: offer.vendorCode || offer.vendor_code || offer.article || '',
           available: normalizeAvailableStatus(offer),
@@ -895,8 +837,19 @@ function uuidv4() {
 }
 
 function getFeedId(sourceUrl?: string, feedName?: string) {
-  if (sourceUrl) {
-    return uuidv5(sourceUrl);
-  }
+  // ВСЕГДА генерируем валидный UUID v4 для Supabase
   return uuidv4();
+}
+
+// --- batch insert для продуктов ---
+export async function batchInsertProducts(products: Product[], feedId: string) {
+  const BATCH_SIZE = 1000;
+  for (let i = 0; i < products.length; i += BATCH_SIZE) {
+    const batch = products.slice(i, i + BATCH_SIZE).map(p => {
+      const { rawOffer, ...rest } = p; // Исключаем rawOffer
+      return { ...rest, feedId };
+    });
+    const { error } = await supabase.from('products').insert(batch);
+    if (error) throw error;
+  }
 }
