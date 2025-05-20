@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+aside {
+  min-height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+}
+
+@media (min-width: 1024px) {
+  aside {
+    display: flex !important;
+  }
+}
