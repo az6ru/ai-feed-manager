@@ -383,7 +383,15 @@ export function mergeDuplicates(feed: Feed, attributesToMerge: string[]): Feed {
     masterProduct.mergedAttributes = attributesToMerge;
     
     // --- ДОБАВЛЯЕМ merged_external_ids ---
-    masterProduct.merged_external_ids = Array.from(new Set(variants.map(v => v.externalId)));
+    // Собираем все externalId и все merged_external_ids из variants
+    const allMergedIds = new Set<string>();
+    variants.forEach(v => {
+      if (v.externalId) allMergedIds.add(String(v.externalId));
+      if (Array.isArray(v.merged_external_ids)) {
+        v.merged_external_ids.forEach(id => allMergedIds.add(String(id)));
+      }
+    });
+    masterProduct.merged_external_ids = Array.from(allMergedIds);
     
     // Сохраняем информацию о размерах в явном виде для интерфейса
     if (sizeValues.length > 0) {

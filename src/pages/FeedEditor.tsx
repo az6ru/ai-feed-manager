@@ -65,37 +65,64 @@ function diffProducts(
   options?: UpdateOptions,
   mergedIdMap?: Record<string, string>
 ): ProductDiff[] {
-  // Используем externalId как ключ!
-  const oldMap: Record<string, Product> = Object.fromEntries(oldProducts.map((p) => [p.externalId, p]));
-  const newMap: Record<string, Product> = Object.fromEntries(newProducts.map((p) => [p.externalId, p]));
-  const diffs: ProductDiff[] = [];
+  // Гарантируем, что у всех новых товаров есть externalId (если нет — подставить из id)
+  newProducts.forEach(p => {
+    if (!p.externalId && p.id) p.externalId = p.id;
+  });
+
   const opts = options || defaultUpdateOptions;
 
-  // Новые товары и изменения
-  for (const externalId in newMap) {
-    if (opts.ignoreMerged && mergedIdMap && mergedIdMap[externalId]) continue;
-    if (!oldMap[externalId]) {
-      if (opts.addNew) {
-        diffs.push({ id: externalId, type: 'new', newProduct: newMap[externalId] });
+  // Собираем id для сравнения
+  let knownIds = new Set<string>();
+  if (opts.ignoreMerged) {
+    // externalId + все merged_external_ids
+    oldProducts.forEach(p => {
+      if (p.externalId) knownIds.add(String(p.externalId));
+      if (Array.isArray(p.merged_external_ids)) {
+        p.merged_external_ids.forEach(id => knownIds.add(String(id)));
       }
+    });
+  } else {
+    // Только externalId
+    oldProducts.forEach(p => {
+      if (p.externalId) knownIds.add(String(p.externalId));
+    });
+  }
+
+  // Лог для отладки
+  console.log('knownIds для сравнения:', Array.from(knownIds));
+
+  const diffs: ProductDiff[] = [];
+  const oldMap: Record<string, Product> = Object.fromEntries(
+    oldProducts.map((p) => [String(p.externalId), p])
+  );
+  const newMap: Record<string, Product> = Object.fromEntries(
+    newProducts.map((p) => [String(p.externalId), p])
+  );
+
+  for (const externalId in newMap) {
+    if (opts.addNew && !knownIds.has(externalId)) {
+      diffs.push({ id: externalId, type: 'new', newProduct: newMap[externalId] });
       continue;
     }
-    const oldP = oldMap[externalId];
-    const newP = newMap[externalId];
-    const changedFields: Record<string, { old: any; new: any }> = {};
-    if (opts.price && oldP.price !== newP.price) changedFields.price = { old: oldP.price, new: newP.price };
-    if (opts.available && Boolean(oldP.available) !== Boolean(newP.available)) changedFields.available = { old: oldP.available, new: newP.available };
-    if (opts.name && oldP.name !== newP.name) changedFields.name = { old: oldP.name, new: newP.name };
-    if (opts.description && oldP.description !== newP.description) changedFields.description = { old: oldP.description, new: newP.description };
-    if (opts.attributes) {
-      const oldAttrs = (oldP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
-      const newAttrs = (newP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
-      if (oldAttrs !== newAttrs) {
-        changedFields.attributes = { old: oldP.attributes, new: newP.attributes };
+    if (oldMap[externalId]) {
+      const oldP = oldMap[externalId];
+      const newP = newMap[externalId];
+      const changedFields: Record<string, { old: any; new: any }> = {};
+      if (opts.price && oldP.price !== newP.price) changedFields.price = { old: oldP.price, new: newP.price };
+      if (opts.available && Boolean(oldP.available) !== Boolean(newP.available)) changedFields.available = { old: oldP.available, new: newP.available };
+      if (opts.name && oldP.name !== newP.name) changedFields.name = { old: oldP.name, new: newP.name };
+      if (opts.description && oldP.description !== newP.description) changedFields.description = { old: oldP.description, new: newP.description };
+      if (opts.attributes) {
+        const oldAttrs = (oldP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
+        const newAttrs = (newP.attributes || []).map(a => `${a.name}:${a.value}`).sort().join('|');
+        if (oldAttrs !== newAttrs) {
+          changedFields.attributes = { old: oldP.attributes, new: newP.attributes };
+        }
       }
-    }
-    if (Object.keys(changedFields).length > 0) {
-      diffs.push({ id: externalId, type: 'changed', changedFields, oldProduct: oldP, newProduct: newP });
+      if (Object.keys(changedFields).length > 0) {
+        diffs.push({ id: externalId, type: 'changed', changedFields, oldProduct: oldP, newProduct: newP });
+      }
     }
   }
   return diffs;

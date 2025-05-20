@@ -327,7 +327,8 @@ function extractProducts(shop: any): Product[] {
   }
   return rawProducts.map((product: any) => {
     let id = generateId(); // внутренний UUID
-    let externalId = product['@_id'] || product.id || ''; // внешний id из фида
+    let externalId = product['@_id'] || product.id || '';
+    product.externalId = externalId;
     let pictures: string[] = [];
     if (product.picture) {
       if (Array.isArray(product.picture)) {
