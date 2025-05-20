@@ -6,6 +6,7 @@ import { isProxyAvailable, fetchFeedContent } from '../services/proxyService';
 import DuplicatesAnalyzer from '../components/DuplicatesAnalyzer';
 import { Feed } from '../types/feed';
 import Modal from '../components/layout/Modal';
+import FeedImportMappingModal from '../components/FeedImportMappingModal';
 
 const FeedImport = () => {
   const [importMethod, setImportMethod] = useState<'file' | 'url'>('file');
@@ -26,6 +27,10 @@ const FeedImport = () => {
   const [pendingMergedFeed, setPendingMergedFeed] = useState<Feed | null>(null);
   const [showAddFeedModal, setShowAddFeedModal] = useState(false);
   const [pendingFeedToAdd, setPendingFeedToAdd] = useState<Feed | null>(null);
+  const [showMappingModal, setShowMappingModal] = useState(false);
+  const [mapping, setMapping] = useState<Record<string, string>>({});
+  const [exampleOffer, setExampleOffer] = useState<Record<string, any> | null>(null);
+  const [pendingFeed, setPendingFeed] = useState<Feed | null>(null);
   
   const { importFeedFromXml, importLargeFeedFromXml, setCurrentFeed, addFeed, updateFeed, feeds } = useFeed();
   const navigate = useNavigate();
@@ -183,6 +188,19 @@ const FeedImport = () => {
           throw new Error('Failed to parse feed data');
         }
         
+        // --- Новый блок: анализ структуры и маппинг ---
+        if (feed.products.length > 0) {
+          // Берём rawOffer (исходный оффер из XML), если есть, иначе сам Product
+          const offer = feed.products[0].rawOffer || feed.products[0];
+          setExampleOffer(offer);
+          setMapping(autoMapping(offer));
+          setPendingFeed(feed);
+          setShowMappingModal(true);
+          setIsLoading(false);
+          return; // Ждём подтверждения маппинга
+        }
+        // --- конец нового блока ---
+
         if (enableDuplicatesCheck) {
           setParsedFeed(feed);
           setShowDuplicatesAnalyzer(true);
@@ -269,6 +287,49 @@ const FeedImport = () => {
       setError(null);
     }
   };
+  
+  // Функция применения маппинга ко всем товарам
+  function applyMappingToProducts(feed: Feed, mapping: Record<string, string>): Feed {
+    const newProducts = feed.products.map((prod) => {
+      // Берём rawOffer (исходный оффер), если есть, иначе сам Product
+      const raw = prod.rawOffer || prod;
+      const mapped: any = { ...prod };
+      Object.entries(mapping).forEach(([productField, offerField]) => {
+        if (offerField && raw[offerField] !== undefined) {
+          mapped[productField] = raw[offerField];
+        }
+      });
+      return mapped;
+    });
+    return { ...feed, products: newProducts };
+  }
+  
+  const productFields = [
+    "name", "description", "price", "oldPrice", "currency", "categoryId", "url", "picture", "available", "vendor", "vendorCode"
+  ];
+
+  function autoMapping(exampleOffer: Record<string, any>): Record<string, string> {
+    const mapping: Record<string, string> = {};
+    const candidates: Record<string, string[]> = {
+      name: ["name", "model", "title"],
+      description: ["description", "desc", "model", "title"],
+      price: ["price"],
+      oldPrice: ["oldPrice", "old_price", "oldprice"],
+      currency: ["currency", "currencyId", "currency_id"],
+      categoryId: ["categoryId", "category_id"],
+      url: ["url"],
+      picture: ["picture", "image", "images"],
+      available: ["available", "@_available"],
+      vendor: ["vendor", "brand"],
+      vendorCode: ["vendorCode", "vendor_code", "article"],
+    };
+    for (const field of productFields) {
+      const options = candidates[field] || [field];
+      const found = options.find(opt => exampleOffer[opt] !== undefined);
+      if (found) mapping[field] = found;
+    }
+    return mapping;
+  }
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -539,6 +600,43 @@ const FeedImport = () => {
           </div>
         </Modal>
       )}
+      
+      <FeedImportMappingModal
+        isOpen={showMappingModal && !!exampleOffer}
+        onClose={() => setShowMappingModal(false)}
+        onConfirm={(selectedMapping) => {
+          setMapping(selectedMapping);
+          if (pendingFeed) {
+            const mappedFeed = applyMappingToProducts(pendingFeed, selectedMapping);
+            if (enableDuplicatesCheck) {
+              setParsedFeed(mappedFeed);
+              setShowDuplicatesAnalyzer(true);
+            } else {
+              setPendingFeedToAdd(mappedFeed);
+              setShowAddFeedModal(true);
+            }
+            setShowMappingModal(false);
+          }
+        }}
+        exampleOffer={exampleOffer || {}}
+        productFields={productFields}
+        initialMapping={mapping}
+        diffPreview={exampleOffer && mapping ? (
+          <table className="min-w-full text-xs border">
+            <thead><tr><th className="border p-1">Поле</th><th className="border p-1">Значение</th></tr></thead>
+            <tbody>
+              {Object.entries(mapping).map(([productField, offerField]) => (
+                <tr key={productField}>
+                  <td className="border p-1">{productField}</td>
+                  <td className="border p-1 max-w-xs truncate overflow-hidden whitespace-nowrap" title={String(exampleOffer[offerField] ?? '')}>
+                    {String(exampleOffer[offerField] ?? '')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : null}
+      />
     </div>
   );
 };

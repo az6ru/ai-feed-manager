@@ -56,7 +56,7 @@ const Modal = ({
       tabIndex={-1}
     >
       <div 
-        className={`w-full ${sizeClasses[size]} bg-white rounded-lg shadow-xl transform transition-all`}
+        className={`w-full ${sizeClasses[size]} bg-white rounded-lg shadow-xl transform transition-all max-h-screen overflow-y-auto`}
         onClick={e => e.stopPropagation()}
       >
         {title && (

@@ -823,28 +823,33 @@ const FeedEditor = () => {
     <>
       {showAISettingsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 overflow-y-auto pt-10 pb-10">
-          <div className="max-w-3xl w-full mx-4 absolute">
-            <FeedAISettingsForm 
-              feed={currentFeed}
-              onUpdate={(updatedFeed) => {
-                console.log('Обновление фида в FeedEditor, новые настройки AI:', updatedFeed.aiSettings);
-                if (!updatedFeed.aiSettings) {
-                  console.error('Критическая ошибка: настройки AI отсутствуют в обновленном фиде!');
-                  alert('Ошибка при сохранении настроек AI. Проверьте консоль для деталей.');
+          <div className="relative max-w-2xl w-full mx-4 bg-white rounded-xl shadow-xl p-0">
+            {/* Кнопка закрытия */}
+            <button
+              onClick={() => setShowAISettingsModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none z-10"
+              title="Закрыть"
+            >
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/></svg>
+            </button>
+            <div className="p-6">
+              <FeedAISettingsForm 
+                feed={currentFeed}
+                onUpdate={(updatedFeed) => {
+                  if (!updatedFeed.aiSettings) {
+                    alert('Ошибка при сохранении настроек AI. Проверьте консоль для деталей.');
+                    setShowAISettingsModal(false);
+                    return;
+                  }
+                  updateFeed(feedId!, { 
+                    aiSettings: updatedFeed.aiSettings,
+                    metadata: updatedFeed.metadata
+                  });
                   setShowAISettingsModal(false);
-                  return;
-                }
-                
-                // Создаем новый объект с настройками AI
-                const aiSettingsUpdate = { ...updatedFeed.aiSettings };
-                console.log('Применяемые настройки AI:', aiSettingsUpdate);
-                
-                // Обновляем только настройки AI
-                updateFeed(feedId!, { aiSettings: aiSettingsUpdate });
-                setShowAISettingsModal(false);
-              }}
-              onCancel={() => setShowAISettingsModal(false)}
-            />
+                }}
+                onCancel={() => setShowAISettingsModal(false)}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -1608,8 +1613,8 @@ const FeedEditor = () => {
                         <span>Фото</span>
                       </div>
                     </th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center cursor-pointer" onClick={() => handleSort('name')}>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-0 w-auto">
+                      <div className="flex items-center cursor-pointer flex-1" onClick={() => handleSort('name')}>
                         <span>Название</span>
                     {sortColumn === 'name' && (
                           <span className="ml-1 text-gray-400">
@@ -1638,7 +1643,7 @@ const FeedEditor = () => {
                     )}
                   </div>
                 </th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36 break-words">
                   <div className="flex items-center">
                         <span>Бренд</span>
                   </div>
@@ -1648,7 +1653,7 @@ const FeedEditor = () => {
                         <span>В выгрузке</span>
                       </div>
                 </th>
-                    <th scope="col" className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       <div className="flex items-center">
                         <span>URL</span>
                       </div>
@@ -1680,7 +1685,7 @@ const FeedEditor = () => {
                       <td className="px-3 py-3 whitespace-nowrap">
                     {renderProductImage(product)}
                   </td>
-                      <td className="px-3 py-3">
+                      <td className="px-3 py-3 min-w-0 w-auto">
                         <div className="text-sm font-medium text-gray-900 break-words line-clamp-2">
                       {product.name}
                     </div>
@@ -1707,8 +1712,8 @@ const FeedEditor = () => {
                           {product.available ? 'В наличии' : 'Отсутствует'}
                     </span>
                   </td>
-                      <td className="px-3 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 font-medium">
+                      <td className="px-3 py-3 break-words">
+                        <div className="text-sm text-gray-900 font-medium break-words">
                       {product.vendor || '-'}
                     </div>
                   </td>
@@ -1729,24 +1734,25 @@ const FeedEditor = () => {
                       </button>
                     </div>
                   </td>
-                      <td className="px-3 py-3">
+                      <td className="px-3 py-3 w-24 max-w-xs truncate overflow-hidden whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                      {product.url || product.generatedUrl ? (
-                        <a 
-                          href={product.url || product.generatedUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                          {product.url || product.generatedUrl ? (
+                            <a 
+                              href={product.url || product.generatedUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
                               className="text-blue-600 hover:text-blue-800 hover:underline flex items-center"
                               onClick={(e) => e.stopPropagation()}
-                        >
-                              <span className="break-all mr-1 line-clamp-1">{product.url || product.generatedUrl}</span>
+                              title={product.url || product.generatedUrl}
+                            >
+                              <span className="truncate mr-1">{product.url || product.generatedUrl}</span>
                               <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                        </a>
-                      ) : (
+                            </a>
+                          ) : (
                             <span className="text-gray-400 text-xs">Нет URL</span>
-                      )}
-                    </div>
-                  </td>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-3 py-3 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                     <button
                           onClick={(e) => {

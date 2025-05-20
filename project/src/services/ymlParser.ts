@@ -455,6 +455,7 @@ function extractProducts(shop: any): Product[] {
       vendor: product.vendor || product.brand || '',
       vendorCode: product.vendorCode || product.vendor_code || product.article || '',
       includeInExport: true, // По умолчанию товар включен в выгрузку
+      rawOffer: product // <-- сохраняем исходный оффер
     };
   });
 }
@@ -532,15 +533,18 @@ function safeFormatAttributeValue(value: any): string {
 }
 
 export function generateYmlFromFeed(feed: Feed): string {
-  // This is a placeholder for the XML generation logic
-  // In a real implementation, this would construct a valid YML XML string
+  // Проверяем, что url магазина указан
+  if (!feed.metadata.url) {
+    throw new Error('В настройках магазина не указан URL сайта (shop.url) — это обязательное поле!');
+  }
+  const shopUrl = feed.metadata.url;
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += `<yml_catalog date="${new Date().toISOString()}">\n`;
   xml += '  <shop>\n';
   xml += `    <name>${escapeXml(feed.metadata.name)}</name>\n`;
   xml += `    <company>${escapeXml(feed.metadata.company)}</company>\n`;
-  xml += `    <url>${escapeXml(feed.metadata.url)}</url>\n`;
+  xml += `    <url>${escapeXml(shopUrl)}</url>\n`;
   
   // Categories
   xml += '    <categories>\n';
@@ -818,6 +822,7 @@ export async function processLargeYmlFile(
           available: normalizeAvailableStatus(offer),
           attributes,
           includeInExport: true, // По умолчанию товар включен в выгрузку
+          rawOffer: offer // <-- сохраняем исходный оффер
         };
       });
       

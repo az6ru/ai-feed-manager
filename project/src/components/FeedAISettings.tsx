@@ -34,6 +34,23 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     maxTokens: feed.aiSettings?.maxTokens || globalSettings.defaultMaxTokens
   });
   
+  // --- Новое состояние для shop settings ---
+  const [shopSettings, setShopSettings] = useState({
+    name: feed.metadata?.name || '',
+    company: feed.metadata?.company || '',
+    url: feed.metadata?.url || '',
+  });
+  const [shopUrlError, setShopUrlError] = useState<string | null>(null);
+  
+  // Сброс shopSettings при изменении feed (например, при открытии модалки)
+  useEffect(() => {
+    setShopSettings({
+      name: feed.metadata?.name || '',
+      company: feed.metadata?.company || '',
+      url: feed.metadata?.url || '',
+    });
+  }, [feed]);
+  
   // Проверка целостности настроек при монтировании компонента
   useEffect(() => {
     // Проверяем, что промпты не undefined/null
@@ -80,9 +97,29 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     }));
   };
   
+  // Обработка изменений в shop settings
+  const handleShopChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setShopSettings(prev => ({ ...prev, [name]: value }));
+  };
+  
   // Сохранение настроек для фида
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Валидация URL магазина
+    if (!shopSettings.url) {
+      setShopUrlError('Укажите адрес сайта магазина (обязательное поле)');
+      return;
+    }
+    try {
+      // Простая проверка на валидный URL (RFC 3986)
+      new URL(shopSettings.url);
+    } catch {
+      setShopUrlError('Некорректный URL. Пример: https://monacomoda.com/');
+      return;
+    }
+    setShopUrlError(null);
     
     console.log('Сохранение настроек AI для фида. Текущие настройки:', settings);
     console.log('Промпт для названий перед сохранением:', settings.namePrompt);
@@ -99,10 +136,16 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
       maxTokens: settings.maxTokens || globalSettings.defaultMaxTokens
     };
     
-    // Создаем новый объект фида с обновленными настройками
+    // Обновляем feed.metadata
     const updatedFeed = {
       ...feed,
-      aiSettings: finalSettings
+      aiSettings: finalSettings,
+      metadata: {
+        ...feed.metadata,
+        name: shopSettings.name,
+        company: shopSettings.company,
+        url: shopSettings.url,
+      }
     };
     
     console.log('Обновленный фид после применения настроек AI:', updatedFeed.aiSettings);
@@ -202,68 +245,125 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   };
   
   return (
-    <div className="bg-white shadow rounded-xl p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <span className="inline-block bg-blue-100 text-blue-600 rounded-full p-2 mr-2">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </span>
-        Настройки AI для фида «{feed.name}»
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Промпты для товаров */}
-        <section>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-900">Промпты для товаров</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Промпт для названий</label>
-              <textarea
-                name="namePrompt"
-                value={settings.namePrompt}
-                onChange={handleChange}
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                placeholder="Введите промпт с плейсхолдером {{товар}}"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Промпт для описаний</label>
-              <textarea
-                name="descriptionPrompt"
-                value={settings.descriptionPrompt}
-                onChange={handleChange}
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                placeholder="Введите промпт с плейсхолдером {{товар}}"
-              />
+    <form onSubmit={handleSubmit}>
+      {/* --- Блок: Настройки магазина --- */}
+      <div className="bg-gray-50 border border-gray-200 overflow-hidden mb-4">
+        <div className="px-5 py-3 border-b border-gray-200 bg-gray-100">
+          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-700">Настройки магазина</h3>
+        </div>
+        <div className="p-5">
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="shop-name" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Название магазина</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <input
+                  type="text"
+                  id="shop-name"
+                  name="name"
+                  value={shopSettings.name}
+                  onChange={handleShopChange}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-sm"
+                  required
+                />
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-4">
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="shop-company" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Компания</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <input
+                  type="text"
+                  id="shop-company"
+                  name="company"
+                  value={shopSettings.company}
+                  onChange={handleShopChange}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-sm"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="shop-url" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">URL магазина</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <input
+                  type="text"
+                  id="shop-url"
+                  name="url"
+                  value={shopSettings.url}
+                  onChange={handleShopChange}
+                  className={`block w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-sm ${shopUrlError ? 'border-red-400' : ''}`}
+                  placeholder="Пример: https://monacomoda.com/"
+                  required
+                />
+                {shopUrlError && <div className="text-red-500 text-xs mt-1">{shopUrlError}</div>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* --- Блок: Настройки AI --- */}
+      <div className="bg-gray-50 border border-gray-200 overflow-hidden mb-4">
+        <div className="px-5 py-3 border-b border-gray-200 bg-gray-100">
+          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-700">Настройки AI</h3>
+        </div>
+        <div className="p-5">
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-name-prompt" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Промпт для названий</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <textarea
+                  id="ai-name-prompt"
+                  name="namePrompt"
+                  value={settings.namePrompt}
+                  onChange={handleChange}
+                  rows={2}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Введите промпт с плейсхолдером {{товар}}"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-description-prompt" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Промпт для описаний</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <textarea
+                  id="ai-description-prompt"
+                  name="descriptionPrompt"
+                  value={settings.descriptionPrompt}
+                  onChange={handleChange}
+                  rows={2}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Введите промпт с плейсхолдером {{товар}}"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Кнопки тестирования и сброса */}
+          <div className="mb-4 flex gap-2">
             <button
               type="button"
               onClick={generateExample}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center gap-2 shadow-sm text-sm"
             >
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M18 4.5L22 8L18 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 19.5L2 16L6 12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M22 8H17.5C13.5 8 10.5 16 6.5 16H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Тестировать на товаре
             </button>
             <button
               type="button"
               onClick={resetToGlobal}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition border border-gray-200"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition border border-gray-200 text-sm"
             >
               Сбросить к глобальным
             </button>
           </div>
           {/* Блок тестирования */}
           {(testResults.generatedName || testResults.generatedDescription || testResults.error || testResults.isLoading) && (
-            <div className="mt-4 border rounded-lg bg-gray-50 p-4">
+            <div className="mb-4 border rounded-md bg-gray-50 p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-blue-700 flex items-center gap-1">
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Результаты тестирования
-                </span>
+                <span className="text-sm font-semibold text-blue-700 flex items-center gap-1">Результаты тестирования</span>
                 <button type="button" onClick={closeTestResults} className="text-gray-400 hover:text-gray-700 p-1 rounded">
                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/></svg>
                 </button>
@@ -276,7 +376,6 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                   </div>
                 ) : testResults.error ? (
                   <div className="text-red-600 p-2 text-sm flex items-center gap-2">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     Ошибка: {testResults.error}
                   </div>
                 ) : (
@@ -297,79 +396,86 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
               </div>
             </div>
           )}
-        </section>
-        {/* Общие настройки */}
-        <section>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-900">Общие настройки</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Язык</label>
-              <select
-                name="language"
-                value={settings.language}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-              >
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="es">Español</option>
-                <option value="it">Italiano</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Тон</label>
-              <select
-                name="tone"
-                value={settings.tone}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-              >
-                <option value="профессиональный">Профессиональный</option>
-                <option value="casual">Повседневный</option>
-                <option value="friendly">Дружелюбный</option>
-                <option value="enthusiastic">Восторженный</option>
-                <option value="informative">Информативный</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Максимум токенов</label>
-              <input
-                type="number"
-                name="maxTokens"
-                value={settings.maxTokens}
-                onChange={handleChange}
-                min={10}
-                max={4000}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-              />
+          {/* Общие настройки AI */}
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-language" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Язык</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <select
+                  id="ai-language"
+                  name="language"
+                  value={settings.language}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                >
+                  <option value="ru">Русский</option>
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                  <option value="de">Deutsch</option>
+                  <option value="es">Español</option>
+                  <option value="it">Italiano</option>
+                </select>
+              </div>
             </div>
           </div>
-        </section>
-        {/* Кнопки */}
-        <div className="flex justify-end gap-3 pt-6">
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
-            >
-              Отмена
-            </button>
-          )}
-          <button
-            type="submit"
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition"
-          >
-            Сохранить
-          </button>
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-tone" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Тон</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <select
+                  id="ai-tone"
+                  name="tone"
+                  value={settings.tone}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                >
+                  <option value="профессиональный">Профессиональный</option>
+                  <option value="casual">Повседневный</option>
+                  <option value="friendly">Дружелюбный</option>
+                  <option value="enthusiastic">Восторженный</option>
+                  <option value="informative">Информативный</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-max-tokens" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Максимум токенов</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <input
+                  type="number"
+                  id="ai-max-tokens"
+                  name="maxTokens"
+                  value={settings.maxTokens}
+                  onChange={handleChange}
+                  min={10}
+                  max={4000}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
+      {/* --- Кнопки --- */}
+      <div className="flex justify-end gap-3 pt-6">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
+          >
+            Отмена
+          </button>
+        )}
+        <button
+          type="submit"
+          className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition"
+        >
+          Сохранить
+        </button>
+      </div>
+    </form>
   );
-};
-
+}; 
 export default FeedAISettingsForm; 

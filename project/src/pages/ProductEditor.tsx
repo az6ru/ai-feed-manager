@@ -530,18 +530,18 @@ const ProductEditor = () => {
           htmlFor="currency"
         >
           <div className="relative">
-            <select
-              id="currency"
-              name="currency"
-              value={product.currency}
-              onChange={handleInputChange}
+          <select
+            id="currency"
+            name="currency"
+            value={product.currency}
+            onChange={handleInputChange}
               className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors appearance-none pr-10"
-            >
-              <option value="RUB">RUB</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-            </select>
+          >
+            <option value="RUB">RUB</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
             <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
             </span>
@@ -556,24 +556,24 @@ const ProductEditor = () => {
           error={formErrors.categoryId}
         >
           <div className="relative">
-            <select
-              id="categoryId"
-              name="categoryId"
-              value={product.categoryId}
-              onChange={handleInputChange}
+          <select
+            id="categoryId"
+            name="categoryId"
+            value={product.categoryId}
+            onChange={handleInputChange}
               className={`block w-full px-3 py-2 border rounded-md text-sm transition-colors appearance-none pr-10 ${
-                formErrors.categoryId 
-                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-              }`}
-            >
-              <option value="">Select a category</option>
-              {currentFeed.categories.map((category: Category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+              formErrors.categoryId 
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
+          >
+            <option value="">Select a category</option>
+            {currentFeed.categories.map((category: Category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
             <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
             </span>
@@ -586,15 +586,15 @@ const ProductEditor = () => {
           htmlFor="url"
         >
           <div className="relative flex items-center">
-            <input
-              type="text"
-              name="url"
-              id="url"
-              value={product.url || ''}
-              onChange={handleInputChange}
+          <input
+            type="text"
+            name="url"
+            id="url"
+            value={product.url || ''}
+            onChange={handleInputChange}
               className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors pr-10"
-              placeholder="https://example.com/product/123"
-            />
+            placeholder="https://example.com/product/123"
+          />
             {product.url && (
               <a
                 href={product.url}
