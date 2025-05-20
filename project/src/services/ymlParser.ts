@@ -131,7 +131,8 @@ export async function parseFeedFromXml(xmlContent: string, feedName: string, sou
     const metadata: FeedMetadata = {
       name: shop.name || shop.title || feedName || 'Неизвестный магазин',
       company: shop.company || shop.organization || '',
-      url: sourceUrl ? (shop.url || shop.site || sourceUrl) : '',
+      url: sourceUrl || '',
+      shopUrl: shop.url || shop.site || '',
       date: result.yml_catalog?.['@_date'] || 
             result[rootElement]?.['@_date'] || 
             new Date().toISOString(),
@@ -533,11 +534,11 @@ function safeFormatAttributeValue(value: any): string {
 }
 
 export function generateYmlFromFeed(feed: Feed): string {
-  // Проверяем, что url магазина указан
-  if (!feed.metadata.url) {
-    throw new Error('В настройках магазина не указан URL сайта (shop.url) — это обязательное поле!');
+  // Проверяем, что shopUrl магазина указан
+  if (!feed.metadata.shopUrl) {
+    throw new Error('В настройках магазина не указан URL сайта (shopUrl) — это обязательное поле!');
   }
-  const shopUrl = feed.metadata.url;
+  const shopUrl = feed.metadata.shopUrl;
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += `<yml_catalog date="${new Date().toISOString()}">\n`;
@@ -721,7 +722,8 @@ export async function processLargeYmlFile(
     const metadata: FeedMetadata = {
       name: shop.name || shop.n || 'Unknown Shop',
       company: shop.company || '',
-      url: sourceUrl ? (shop.url || shop.site || sourceUrl) : '',
+      url: sourceUrl || '',
+      shopUrl: shop.url || shop.site || '',
       date: result.yml_catalog?.['@_date'] || 
             result['@_date'] || 
             new Date().toISOString(),

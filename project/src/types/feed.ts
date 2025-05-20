@@ -45,7 +45,8 @@ export interface Category {
 export interface FeedMetadata {
   name: string;
   company: string;
-  url: string;
+  url: string; // ссылка на исходный XML/YML (feedUrl)
+  shopUrl?: string; // адрес магазина для YML (shopUrl)
   date: string;
   mergedIdMap?: Record<string, string>; // карта объединённых id
 }

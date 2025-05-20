@@ -38,7 +38,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   const [shopSettings, setShopSettings] = useState({
     name: feed.metadata?.name || '',
     company: feed.metadata?.company || '',
-    url: feed.metadata?.url || '',
+    shopUrl: feed.metadata?.shopUrl || '',
   });
   const [shopUrlError, setShopUrlError] = useState<string | null>(null);
   
@@ -47,7 +47,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     setShopSettings({
       name: feed.metadata?.name || '',
       company: feed.metadata?.company || '',
-      url: feed.metadata?.url || '',
+      shopUrl: feed.metadata?.shopUrl || '',
     });
   }, [feed]);
   
@@ -108,13 +108,12 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     e.preventDefault();
     
     // Валидация URL магазина
-    if (!shopSettings.url) {
+    if (!shopSettings.shopUrl) {
       setShopUrlError('Укажите адрес сайта магазина (обязательное поле)');
       return;
     }
     try {
-      // Простая проверка на валидный URL (RFC 3986)
-      new URL(shopSettings.url);
+      new URL(shopSettings.shopUrl);
     } catch {
       setShopUrlError('Некорректный URL. Пример: https://monacomoda.com/');
       return;
@@ -144,7 +143,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
         ...feed.metadata,
         name: shopSettings.name,
         company: shopSettings.company,
-        url: shopSettings.url,
+        shopUrl: shopSettings.shopUrl,
       }
     };
     
@@ -291,8 +290,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                 <input
                   type="text"
                   id="shop-url"
-                  name="url"
-                  value={shopSettings.url}
+                  name="shopUrl"
+                  value={shopSettings.shopUrl}
                   onChange={handleShopChange}
                   className={`block w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-sm ${shopUrlError ? 'border-red-400' : ''}`}
                   placeholder="Пример: https://monacomoda.com/"
