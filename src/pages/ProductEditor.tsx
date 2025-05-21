@@ -256,15 +256,16 @@ const ProductEditor = () => {
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="mb-4 flex items-center">
-        <Button
+        <button
           onClick={() => navigate(`/feeds/${feedId}`)}
-          variant="ghost"
-          size="sm"
-          leftIcon={<ArrowLeft className="w-4 h-4" />}
-          className="text-blue-600 hover:text-blue-800"
+          className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 bg-white rounded hover:bg-gray-50 text-gray-700 text-sm font-medium w-fit"
+          tabIndex={0}
+          aria-label="Назад к фиду"
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') navigate(`/feeds/${feedId}`); }}
         >
-          Back to Feed
-        </Button>
+          <ArrowLeft className="h-4 w-4" />
+          <span>Назад к фиду</span>
+        </button>
       </div>
       
       <div className="mb-5">
