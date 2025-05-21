@@ -301,10 +301,10 @@ function UpdateOptionsModal({ isOpen, onClose, onApply, options, setOptions }: {
 }
 
 const FeedEditor = () => {
+  // Все хуки объявлены в самом начале компонента!
   const { feedId } = useParams<{ feedId: string }>();
   const navigate = useNavigate();
   const { feeds, currentFeed, setCurrentFeed, updateFeed, updateProducts, importFeedFromXml, importLargeFeedFromXml } = useFeed();
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [sortColumn, setSortColumn] = useState<keyof Product>('name');
@@ -329,32 +329,13 @@ const FeedEditor = () => {
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [exportFilter, setExportFilter] = useState<boolean | null>(null);
   const [attributeFilters, setAttributeFilters] = useState<{ [attrName: string]: string[] }>({});
-  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>(() => {
-    // Инициализируем базовые секции как свернутые
-    const defaultCollapsed: {[key: string]: boolean} = {
-      availability: true,
-      vendor: true,
-      export: true,
-      discount: true,
-    };
-    
-    // Добавляем динамические секции для атрибутов (если есть currentFeed)
-    if (currentFeed) {
-      const allAttrNames = new Set<string>();
-      currentFeed.products.forEach(product => {
-        (product.attributes || []).forEach(attr => {
-          allAttrNames.add(attr.name);
-        });
-      });
-      
-      allAttrNames.forEach(attrName => {
-        const sectionKey = `attr_${attrName}`;
-        defaultCollapsed[sectionKey] = true;
-      });
-    }
-    
-    return defaultCollapsed;
-  });
+  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>(() => ({
+    availability: true,
+    vendor: true,
+    export: true,
+    discount: true,
+    // Динамические секции для атрибутов будут добавляться ниже
+  }));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectAllPages, setSelectAllPages] = useState(false);
   const [currentModalImageIndex, setCurrentModalImageIndex] = useState(0);
@@ -366,45 +347,33 @@ const FeedEditor = () => {
   const [showUpdateOptionsModal, setShowUpdateOptionsModal] = useState(false);
   const [updateOptions, setUpdateOptions] = useState<UpdateOptions>(defaultUpdateOptions);
   const [showBrandStatsModal, setShowBrandStatsModal] = useState(false);
-  
-  // ВСЕ useEffect вместе в начале компонента
-  // Эффект 1: Загружаем URL фида при монтировании компонента, если фид уже опубликован
+  // Все useEffect/useMemo тоже идут здесь
   useEffect(() => {
     if (currentFeed?.isPublished && currentFeed?.publishedUrl) {
       setFeedPublicUrl(currentFeed.publishedUrl);
     }
   }, [currentFeed]);
-  
-  // Эффект 2: Загрузка фида по ID
   useEffect(() => {
     if (feedId) {
-      // Find the feed if it exists
       const feed = feeds.find(f => f.id === feedId);
-      
       if (feed) {
         setCurrentFeed(feedId);
       } else {
-        // Feed not found, redirect to dashboard
         navigate('/');
       }
     }
   }, [feedId, feeds, setCurrentFeed, navigate]);
-  
-  // Эффект 3: Сброс выделения при изменении фильтров
   useEffect(() => {
     setSelectAllPages(false);
     setSelectedProducts([]);
   }, [searchQuery, selectedVendors, exportFilter, attributeFilters, availabilityFilter]);
-  
+  // Мемоизации
   const productsPerPage = 10;
-  
-  // Мемоизированные значения
   const uniqueVendors = useMemo(() => {
     if (!currentFeed) return [];
     const vendors = currentFeed.products.map(p => p.vendor).filter(Boolean);
     return Array.from(new Set(vendors)).sort();
   }, [currentFeed]);
-  
   const attributeOptions = useMemo(() => {
     if (!currentFeed) return {};
     const options: { [attrName: string]: Set<string> } = {};
@@ -418,37 +387,26 @@ const FeedEditor = () => {
       Object.entries(options).map(([name, set]) => [name, Array.from(set).sort()])
     );
   }, [currentFeed]);
-  
   const filteredProducts = useMemo(() => {
     if (!currentFeed) return [];
     return currentFeed.products.filter(product => {
       const query = searchQuery.trim().toLowerCase();
       if (!query && availabilityFilter === null && selectedVendors.length === 0 && exportFilter === null && Object.values(attributeFilters).every(arr => arr.length === 0)) return true;
-      // Поиск по id (UUID)
       const matchesId = product.id && product.id.toLowerCase().includes(query);
-      // Поиск по externalId
       const matchesExternalId = product.externalId && product.externalId.toLowerCase().includes(query);
-      // Поиск по vendor
       const matchesVendorSearch = product.vendor && product.vendor.toLowerCase().includes(query);
-      // Поиск по url
       const matchesUrl = (product.url && product.url.toLowerCase().includes(query)) ||
                         (product.generatedUrl && product.generatedUrl.toLowerCase().includes(query));
-      // Поиск по name, vendorCode
       const matchesName = product.name && product.name.toLowerCase().includes(query);
       const matchesVendorCode = product.vendorCode && product.vendorCode.toLowerCase().includes(query);
       const matchesSearch = !query || matchesId || matchesExternalId || matchesVendorSearch || matchesUrl || matchesName || matchesVendorCode;
-      // Фильтр по доступности
       const matchesAvailability = availabilityFilter === null || product.available === availabilityFilter;
-      // Фильтр по vendor (множественный выбор)
       const matchesVendor = selectedVendors.length === 0 || (product.vendor && selectedVendors.includes(product.vendor));
-      // Фильтр по участию в выгрузке
       const matchesExport = exportFilter === null || product.includeInExport === exportFilter;
-      // Фильтр по скидке
       let matchesDiscount = true;
       const discountFilter = attributeFilters['__discount']?.[0] || 'all';
       if (discountFilter === 'discount') matchesDiscount = product.oldPrice != null;
       if (discountFilter === 'no_discount') matchesDiscount = product.oldPrice == null;
-      // Универсальная фильтрация по атрибутам
       const matchesAttributes = Object.entries(attributeFilters)
         .filter(([attrName]) => attrName !== '__discount')
         .every(([attrName, selectedValues]) => {
@@ -459,8 +417,18 @@ const FeedEditor = () => {
       return matchesSearch && matchesAvailability && matchesVendor && matchesExport && matchesDiscount && matchesAttributes;
     });
   }, [currentFeed, searchQuery, availabilityFilter, selectedVendors, exportFilter, attributeFilters]);
-  
-  // Если нет currentFeed, показываем лоадер
+  // useEffect: добавляем новые секции для атрибутов как свернутые
+  useEffect(() => {
+    Object.keys(attributeOptions).forEach(attrName => {
+      const sectionKey = `attr_${attrName}`;
+      setCollapsedSections(prev =>
+        prev[sectionKey] === undefined
+          ? { ...prev, [sectionKey]: true }
+          : prev
+      );
+    });
+  }, [attributeOptions]);
+  // Только после всех хуков — return и условия
   if (!currentFeed) {
     return (
       <div className="flex items-center justify-center h-full">

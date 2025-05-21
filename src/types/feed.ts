@@ -66,6 +66,8 @@ export interface Feed {
   aiSettings?: FeedAISettings;
   isPublished?: boolean;
   publishedUrl?: string;
+  products_count?: number;
+  categories_count?: number;
 }
 
 export interface FeedAISettings {

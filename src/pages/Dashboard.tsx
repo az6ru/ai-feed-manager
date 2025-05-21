@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   UploadCloud, Edit, Trash2, Calendar, Package, ShoppingBag, 
-  ArrowUpRight, FileText, Clock, ExternalLink
+  ArrowUpRight, FileText, Clock, ExternalLink, Loader
 } from 'lucide-react';
 import { useFeed } from '../context/FeedContext';
 import { Feed } from '../types/feed';
 
 const Dashboard = () => {
-  const { feeds, deleteFeed, setCurrentFeed } = useFeed();
+  const { feeds, deleteFeed, setCurrentFeed, isLoading } = useFeed();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [feedToDelete, setFeedToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -42,6 +42,15 @@ const Dashboard = () => {
       day: 'numeric',
     });
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader className="w-12 h-12 animate-spin text-blue-500 mb-4" />
+        <div className="text-lg text-gray-700">Загрузка фидов...</div>
+      </div>
+    );
+  }
   
   const renderFeedCards = () => {
     if (feeds.length === 0) {
@@ -93,13 +102,13 @@ const Dashboard = () => {
         />
         <DashboardStat 
           title="Total Products" 
-          value={feeds.reduce((sum, feed) => sum + feed.products.length, 0).toString()} 
+          value={feeds.reduce((sum, feed) => sum + (feed.products_count ?? feed.productsCount ?? 0), 0).toString()} 
           icon={<Package className="w-5 h-5 text-blue-500" />}
           color="bg-blue-100"
         />
         <DashboardStat 
           title="Categories" 
-          value={feeds.reduce((sum, feed) => sum + feed.categories.length, 0).toString()} 
+          value={feeds.reduce((sum, feed) => sum + (feed.categories_count ?? feed.categoriesCount ?? 0), 0).toString()} 
           icon={<ShoppingBag className="w-5 h-5 text-green-500" />}
           color="bg-green-100"
         />
@@ -200,11 +209,11 @@ const FeedCard = ({
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Products</span>
-            <span className="text-sm font-medium text-gray-900">{feed.products.length}</span>
+            <span className="text-sm font-medium text-gray-900">{feed.products_count ?? feed.productsCount ?? 0}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Categories</span>
-            <span className="text-sm font-medium text-gray-900">{feed.categories.length}</span>
+            <span className="text-sm font-medium text-gray-900">{feed.categories_count ?? feed.categoriesCount ?? 0}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Version</span>

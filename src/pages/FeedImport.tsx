@@ -4,9 +4,10 @@ import { Upload, Link, AlertCircle, Server, RefreshCw, Search } from 'lucide-rea
 import { useFeed } from '../context/FeedContext';
 import { isProxyAvailable, fetchFeedContent } from '../services/proxyService';
 import DuplicatesAnalyzer from '../components/DuplicatesAnalyzer';
-import { Feed } from '../types/feed';
+import { Feed, Product } from '../types/feed';
 import Modal from '../components/layout/Modal';
 import FeedImportMappingModal from '../components/FeedImportMappingModal';
+import ImportFeedProgressModal from '../components/ImportFeedProgressModal';
 
 const FeedImport = () => {
   const [importMethod, setImportMethod] = useState<'file' | 'url'>('file');
@@ -31,6 +32,9 @@ const FeedImport = () => {
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [exampleOffer, setExampleOffer] = useState<Record<string, any> | null>(null);
   const [pendingFeed, setPendingFeed] = useState<Feed | null>(null);
+  const [importStep, setImportStep] = useState<'idle' | 'loading' | 'saving' | 'done'>('idle');
+  const [savingProgress, setSavingProgress] = useState(0);
+  const [pendingFeedId, setPendingFeedId] = useState<string | null>(null);
   
   const { importFeedFromXml, importLargeFeedFromXml, setCurrentFeed, addFeed, updateFeed, feeds } = useFeed();
   const navigate = useNavigate();
@@ -39,6 +43,16 @@ const FeedImport = () => {
   useEffect(() => {
     checkProxyAvailability();
   }, []);
+  
+  useEffect(() => {
+    if (pendingFeedId) {
+      const exists = feeds.some(f => f.id === pendingFeedId);
+      if (exists) {
+        navigate(`/feeds/${pendingFeedId}`);
+        setPendingFeedId(null);
+      }
+    }
+  }, [feeds, pendingFeedId, navigate]);
   
   const checkProxyAvailability = async () => {
     setIsCheckingProxy(true);
@@ -90,12 +104,14 @@ const FeedImport = () => {
   
   const handleImport = async () => {
     setError(null);
+    setImportStep('loading');
     setIsLoading(true);
     setProgress(0);
     
     if (!feedName.trim()) {
       setError('Please provide a name for the feed');
       setIsLoading(false);
+      setImportStep('idle');
       return;
     }
     
@@ -106,6 +122,7 @@ const FeedImport = () => {
         if (!selectedFile) {
           setError('Please select a file to import');
           setIsLoading(false);
+          setImportStep('idle');
           return;
         }
         
@@ -121,6 +138,7 @@ const FeedImport = () => {
         if (!feedUrl.trim()) {
           setError('Please enter a valid URL');
           setIsLoading(false);
+          setImportStep('idle');
           return;
         }
         
@@ -137,6 +155,7 @@ const FeedImport = () => {
           console.error('Fetch error:', err);
           setError(`Failed to fetch from URL: ${err.message}`);
           setIsLoading(false);
+          setImportStep('idle');
           return;
         }
       }
@@ -144,6 +163,7 @@ const FeedImport = () => {
       if (!xmlContent || xmlContent.trim().length === 0) {
         setError('Received empty content');
         setIsLoading(false);
+        setImportStep('idle');
         return;
       }
       
@@ -164,6 +184,7 @@ const FeedImport = () => {
           setError('Полученный контент не похож на XML фид. Проверьте URL или загрузите файл вручную.');
         }
         setIsLoading(false);
+        setImportStep('idle');
         return;
       }
       
@@ -197,6 +218,7 @@ const FeedImport = () => {
           setPendingFeed(feed);
           setShowMappingModal(true);
           setIsLoading(false);
+          setImportStep('idle');
           return; // Ждём подтверждения маппинга
         }
         // --- конец нового блока ---
@@ -205,46 +227,77 @@ const FeedImport = () => {
           setParsedFeed(feed);
           setShowDuplicatesAnalyzer(true);
           setIsLoading(false);
+          setImportStep('idle');
         } else {
           setPendingFeedToAdd(feed);
           setShowAddFeedModal(true);
           setIsLoading(false);
+          setImportStep('idle');
         }
       } catch (parseError: any) {
         console.error('Parse error:', parseError);
         setError(`Failed to parse feed data: ${parseError.message}`);
         setIsLoading(false);
+        setImportStep('idle');
       }
     } catch (err: any) {
       console.error('Import error:', err);
       setError(`Failed to import feed: ${err.message}`);
       setIsLoading(false);
+      setImportStep('idle');
+    } finally {
+      // Сброс выбранного файла и input после импорта, чтобы повторный выбор срабатывал всегда
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
   
+  // Функция для батчевого сохранения товаров с прогрессом
+  async function saveFeedWithProgress(feed: Feed, onProgress: (progress: number) => void) {
+    const batchSize = 200;
+    const total = feed.products.length;
+    let saved = 0;
+    let newFeed = { ...feed, products: [] as Product[] };
+    while (saved < total) {
+      const batch = feed.products.slice(saved, saved + batchSize);
+      await new Promise(res => setTimeout(res, 80)); // имитация задержки
+      newFeed.products.push(...batch);
+      saved += batch.length;
+      onProgress(Math.round((saved / total) * 100));
+    }
+    addFeed({ ...feed });
+  }
+  
   // Обработчик завершения анализа дубликатов
-  const handleDuplicatesMergeComplete = (mergedFeed: Feed) => {
-    addFeed(mergedFeed);
+  const handleDuplicatesMergeComplete = async (mergedFeed: Feed) => {
+    setImportStep('saving');
+    setSavingProgress(0);
+    await saveFeedWithProgress(mergedFeed, setSavingProgress);
     setCurrentFeed(mergedFeed.id);
     setPendingMergedFeed(mergedFeed);
-    navigate(`/feeds/${mergedFeed.id}?pendingMerge=1`);
+    setSavingProgress(100);
+    setTimeout(() => {
+      setImportStep('done');
+      setTimeout(() => navigate(`/feeds/${mergedFeed.id}?pendingMerge=1`), 1200);
+    }, 500);
   };
   
   // Обработчик отмены анализа дубликатов
-  const handleDuplicatesCancel = () => {
+  const handleDuplicatesCancel = async () => {
     // Если пользователь отменил анализ, проверяем, не добавлен ли уже этот фид
     if (parsedFeed) {
       const existingFeedIndex = feeds.findIndex((f: Feed) => f.id === parsedFeed.id);
-      
       if (existingFeedIndex !== -1) {
-        // Если фид уже существует, просто используем его
         setCurrentFeed(parsedFeed.id);
+        setPendingFeedId(parsedFeed.id);
       } else {
-        // Только если фид не существует, добавляем его
-        addFeed(parsedFeed);
+        setImportStep('saving');
+        setSavingProgress(0);
+        setPendingFeedId(parsedFeed.id);
+        await saveFeedWithProgress(parsedFeed, setSavingProgress);
         setCurrentFeed(parsedFeed.id);
+        setSavingProgress(100);
       }
-      navigate(`/feeds/${parsedFeed.id}`);
     }
     setShowDuplicatesAnalyzer(false);
   };
@@ -589,11 +642,17 @@ const FeedImport = () => {
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowAddFeedModal(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Отмена</button>
               <button
-                onClick={() => {
-                  addFeed(pendingFeedToAdd);
+                onClick={async () => {
+                  setImportStep('saving');
+                  setSavingProgress(0);
+                  await saveFeedWithProgress(pendingFeedToAdd, setSavingProgress);
                   setCurrentFeed(pendingFeedToAdd.id);
                   setShowAddFeedModal(false);
-                  navigate(`/feeds/${pendingFeedToAdd.id}`);
+                  setSavingProgress(100);
+                  setTimeout(() => {
+                    setImportStep('done');
+                    setTimeout(() => navigate(`/feeds/${pendingFeedToAdd.id}`), 1200);
+                  }, 500);
                 }}
                 className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
               >
@@ -647,6 +706,14 @@ const FeedImport = () => {
           </table>
         ) : null}
       />
+      
+      {importStep !== 'idle' && (
+        <ImportFeedProgressModal
+          step={importStep === 'done' ? 'done' : importStep}
+          progress={importStep === 'loading' ? progress : importStep === 'saving' ? savingProgress : undefined}
+          showProgress={importStep === 'loading' || importStep === 'saving'}
+        />
+      )}
     </div>
   );
 };

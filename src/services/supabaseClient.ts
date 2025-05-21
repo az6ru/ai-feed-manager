@@ -210,7 +210,7 @@ export async function getOrCreateProfile(user: { id: string, email: string }) {
 export async function getFeeds(userId: string) {
   const { data, error } = await supabase
     .from('feeds')
-    .select('*')
+    .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count')
     .eq('user_id', userId);
   if (error) throw error;
   return toCamelCase(data);
@@ -298,12 +298,24 @@ export async function deleteCategory(categoryId: string) {
 
 // --- PRODUCTS ---
 export async function getProducts(feedId: string) {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('feed_id', feedId);
-  if (error) throw error;
-  return toCamelCase(data);
+  const PAGE_SIZE = 1000;
+  let allProducts: any[] = [];
+  let page = 0;
+  let fetched = 0;
+  let total = 0;
+  do {
+    const { data, error, count } = await supabase
+      .from('products')
+      .select('*', { count: 'exact' })
+      .eq('feed_id', feedId)
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (error) throw error;
+    if (data) allProducts = allProducts.concat(data);
+    fetched += data?.length || 0;
+    total = count ?? fetched;
+    page++;
+  } while (fetched < total);
+  return toCamelCase(allProducts);
 }
 
 export async function createProduct(product: any) {
@@ -356,4 +368,25 @@ export async function batchInsertCategories(categories: any[], feedId: string) {
     const { error } = await supabase.from('categories').insert(batch);
     if (error) throw error;
   }
+}
+
+// Функция для обновления счетчиков товаров и категорий
+export async function updateFeedCounters(feedId: string) {
+  // Считаем количество товаров
+  const { count: productsCount, error: err1 } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('feed_id', feedId);
+  if (err1) throw err1;
+  // Считаем количество категорий
+  const { count: categoriesCount, error: err2 } = await supabase
+    .from('categories')
+    .select('*', { count: 'exact', head: true })
+    .eq('feed_id', feedId);
+  if (err2) throw err2;
+  // Обновляем поля в feeds
+  await supabase
+    .from('feeds')
+    .update({ products_count: productsCount, categories_count: categoriesCount })
+    .eq('id', feedId);
 } 

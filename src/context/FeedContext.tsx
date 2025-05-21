@@ -16,7 +16,8 @@ import {
   updateCategory,
   deleteCategory,
   batchInsertProducts,
-  batchInsertCategories
+  batchInsertCategories,
+  updateFeedCounters
 } from '../services/supabaseClient';
 
 interface FeedContextProps {
@@ -48,18 +49,8 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     setIsLoading(true);
     getFeeds(user.id)
-      .then(async (feedsFromDb) => {
-        // Для каждого фида подтягиваем продукты и категории
-        const feedsWithData = await Promise.all(
-          feedsFromDb.map(async (feed: any) => {
-            const [products, categories] = await Promise.all([
-              getProducts(feed.id),
-              getCategories(feed.id)
-            ]);
-            return { ...feed, products, categories };
-          })
-        );
-        setFeeds(feedsWithData);
+      .then((feedsFromDb) => {
+        setFeeds(feedsFromDb); // только метаданные и счетчики
       })
       .catch((err) => setError(err.message || 'Ошибка загрузки фидов'))
       .finally(() => setIsLoading(false));
@@ -70,14 +61,12 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     setIsLoading(true);
     try {
-      // Исключаем products и categories из объекта для Supabase
       const { products = [], categories = [], ...feedData } = feed;
       const created = await createFeed({ ...feedData, userId: user.id });
-      // Батчем категории
       await batchInsertCategories(categories, created.id);
-      // Батчем продукты
       await batchInsertProducts(products, created.id);
-      setFeeds(prev => [...prev, { ...created, products, categories }]);
+      await updateFeedCounters(created.id);
+      setFeeds(prev => [...prev, { ...created, products_count: products.length, categories_count: categories.length }]);
     } catch (e: any) {
       setError(e.message || 'Ошибка при добавлении фида');
     } finally {
@@ -114,13 +103,35 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setCurrentFeed = (id: string | null) => {
+  const setCurrentFeed = async (id: string | null) => {
     if (id === null) {
       setCurrentFeedState(null);
       return;
     }
-    const feed = feeds.find(f => f.id === id) || null;
-    setCurrentFeedState(feed);
+    let feed = feeds.find(f => f.id === id) || null;
+    if (!feed) {
+      setCurrentFeedState(null);
+      return;
+    }
+    // Если уже есть товары и категории — просто ставим
+    if (feed.products && feed.categories) {
+      setCurrentFeedState(feed);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const [products, categories] = await Promise.all([
+        getProducts(feed.id),
+        getCategories(feed.id)
+      ]);
+      feed = { ...feed, products, categories };
+      setFeeds(prev => prev.map(f => f.id === id ? { ...f, products, categories } : f));
+      setCurrentFeedState(feed);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка загрузки товаров/категорий');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // --- CRUD продуктов ---
