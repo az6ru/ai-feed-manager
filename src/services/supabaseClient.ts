@@ -210,10 +210,19 @@ export async function getOrCreateProfile(user: { id: string, email: string }) {
 export async function getFeeds(userId: string) {
   const { data, error } = await supabase
     .from('feeds')
-    .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count')
+    .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count, ai_settings')
     .eq('user_id', userId);
   if (error) throw error;
-  return toCamelCase(data);
+  
+  // Преобразуем ai_settings в aiSettings для всех фидов
+  const result = toCamelCase(data);
+  return result.map((feed: any) => {
+    if (feed.ai_settings) {
+      feed.aiSettings = toCamelCase(feed.ai_settings);
+      delete feed.ai_settings;
+    }
+    return feed;
+  });
 }
 
 export async function getFeed(feedId: string) {
@@ -223,28 +232,70 @@ export async function getFeed(feedId: string) {
     .eq('id', feedId)
     .single();
   if (error) throw error;
-  return toCamelCase(data);
+  
+  // Преобразуем ai_settings в aiSettings для клиента
+  const result = toCamelCase(data);
+  if (result.ai_settings) {
+    result.aiSettings = toCamelCase(result.ai_settings);
+    delete result.ai_settings;
+  }
+  
+  return result;
 }
 
 export async function createFeed(feed: any) {
+  // Обработка aiSettings, если они присутствуют
+  const feedData = { ...feed };
+  
+  // Если есть настройки AI, преобразуем их в snake_case для базы данных
+  if (feedData.aiSettings) {
+    feedData.ai_settings = toSnakeCase(feedData.aiSettings);
+    delete feedData.aiSettings; // Удаляем оригинальное поле
+  }
+  
   const { data, error } = await supabase
     .from('feeds')
-    .insert([toSnakeCase(feed)])
+    .insert([toSnakeCase(feedData)])
     .select()
     .single();
   if (error) throw error;
-  return toCamelCase(data);
+  
+  // Преобразуем ai_settings обратно в aiSettings для клиента
+  const result = toCamelCase(data);
+  if (result.ai_settings) {
+    result.aiSettings = toCamelCase(result.ai_settings);
+    delete result.ai_settings;
+  }
+  
+  return result;
 }
 
 export async function updateFeed(feedId: string, updates: any) {
+  // Обработка aiSettings, если они присутствуют
+  const updatedData = { ...updates };
+  
+  // Если есть настройки AI, сериализуем их в JSON для хранения в БД
+  if (updatedData.aiSettings) {
+    updatedData.ai_settings = toSnakeCase(updatedData.aiSettings);
+    delete updatedData.aiSettings; // Удаляем оригинальное поле, чтобы избежать дублирования
+  }
+  
   const { data, error } = await supabase
     .from('feeds')
-    .update(toSnakeCase(updates))
+    .update(toSnakeCase(updatedData))
     .eq('id', feedId)
     .select()
     .single();
   if (error) throw error;
-  return toCamelCase(data);
+  
+  // Преобразуем ai_settings обратно в aiSettings для клиента
+  const result = toCamelCase(data);
+  if (result.ai_settings) {
+    result.aiSettings = toCamelCase(result.ai_settings);
+    delete result.ai_settings;
+  }
+  
+  return result;
 }
 
 export async function deleteFeed(feedId: string) {
@@ -305,11 +356,11 @@ export async function getProducts(feedId: string) {
   let total = 0;
   do {
     const { data, error, count } = await supabase
-      .from('products')
+    .from('products')
       .select('*', { count: 'exact' })
       .eq('feed_id', feedId)
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-    if (error) throw error;
+  if (error) throw error;
     if (data) allProducts = allProducts.concat(data);
     fetched += data?.length || 0;
     total = count ?? fetched;

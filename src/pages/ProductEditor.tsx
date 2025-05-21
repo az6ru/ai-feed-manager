@@ -16,11 +16,13 @@ import AIGenerated from '../components/AIGenerated';
 const ProductEditor = () => {
   const { feedId, productId } = useParams<{ feedId: string, productId: string }>();
   const navigate = useNavigate();
-  const { feeds, currentFeed, setCurrentFeed, updateProduct } = useFeed();
+  const { feeds, currentFeed, setCurrentFeed, updateProduct, deleteProduct } = useFeed();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAiEnhanceModal, setShowAiEnhanceModal] = useState(false);
   const [aiEnhanceType, setAiEnhanceType] = useState<'description' | 'attributes' | null>(null);
   const [enhancedText, setEnhancedText] = useState('');
@@ -159,7 +161,24 @@ const ProductEditor = () => {
     setIsSaving(true);
     
     try {
-      updateProduct(feedId!, productId!, product);
+      if (!feedId || !productId || !product) {
+        throw new Error('Missing required data for saving');
+      }
+      
+      // Проверяем, обновлены ли generatedName или generatedDescription
+      const hasGeneratedContent = product.generatedName || product.generatedDescription;
+      
+      if (hasGeneratedContent) {
+        console.log('Saving product with AI-generated content:', { 
+          generatedName: product.generatedName, 
+          generatedDescription: product.generatedDescription 
+        });
+      }
+      
+      // Сохраняем товар через контекст
+      await updateProduct(feedId, productId, product);
+      
+      // Перенаправляем на страницу фида
       navigate(`/feeds/${feedId}`);
     } catch (err) {
       console.error('Error saving product:', err);
@@ -167,6 +186,30 @@ const ProductEditor = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+  
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    if (!feedId || !productId) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteProduct(feedId, productId);
+      // После успешного удаления перенаправляем на страницу фида
+      navigate(`/feeds/${feedId}`);
+    } catch (err) {
+      console.error('Error deleting product:', err);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+  
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
   };
   
   const simulateAiEnhance = (type: 'description' | 'attributes') => {
@@ -782,10 +825,11 @@ const ProductEditor = () => {
         <div className="flex space-x-2">
           <Button
             type="button"
-            onClick={() => {/* Add delete functionality */}}
+            onClick={handleDeleteClick}
             variant="outline"
             className="text-red-600 border-red-200 hover:bg-red-50"
             leftIcon={<Trash2 className="w-4 h-4" />}
+            isLoading={isDeleting}
           >
             Delete
           </Button>
@@ -944,6 +988,39 @@ const ProductEditor = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Подтверждение удаления</h3>
+            <p className="text-gray-600 mb-6">
+              Вы уверены, что хотите удалить товар "{product?.name}"? Это действие необратимо.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                type="button"
+                onClick={handleDeleteCancel}
+                variant="outline"
+                size="sm"
+              >
+                Отмена
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDeleteConfirm}
+                variant="primary"
+                size="sm"
+                isLoading={isDeleting}
+                leftIcon={<Trash2 className="w-4 h-4" />}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Удалить товар
+              </Button>
+            </div>
           </div>
         </div>
       )}

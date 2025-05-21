@@ -33,6 +33,7 @@ interface FeedContextProps {
   importLargeFeedFromXml: (xml: string, name: string, onProgress?: (processed: number, total: number) => void, sourceUrl?: string) => Promise<Feed>;
   updateProduct: (feedId: string, productExternalId: string, updates: Partial<Product>) => void;
   updateProducts: (feedId: string, productExternalIds: string[], updates: Partial<Product>) => void;
+  deleteProduct: (feedId: string, productId: string) => Promise<void>;
 }
 
 const FeedContext = createContext<FeedContextProps | undefined>(undefined);
@@ -126,7 +127,7 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       ]);
       feed = { ...feed, products, categories };
       setFeeds(prev => prev.map(f => f.id === id ? { ...f, products, categories } : f));
-      setCurrentFeedState(feed);
+    setCurrentFeedState(feed);
     } catch (e: any) {
       setError(e.message || 'Ошибка загрузки товаров/категорий');
     } finally {
@@ -141,13 +142,25 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       // Находим продукт по externalId
       const product = feeds.find(f => f.id === feedId)?.products.find(p => p.externalId === productExternalId);
       if (!product) throw new Error('Product not found');
-      const updated = await updateProductSupabase(product.id, updates);
+      
+      // Подготавливаем данные для обновления
+      const updatesToSave = { ...updates };
+      
+      // Сохраняем сгенерированные AI поля, если они есть
+      if (updatesToSave.generatedName !== undefined || updatesToSave.generatedDescription !== undefined) {
+        // Просто проверяем наличие полей, сами данные уже включены в updatesToSave
+        console.log('Сохраняем AI-генерированный контент для продукта:', product.id);
+      }
+      
+      const updated = await updateProductSupabase(product.id, updatesToSave);
+      
       setFeeds(prev => prev.map(feed =>
         feed.id !== feedId ? feed : {
           ...feed,
           products: feed.products.map(p => p.externalId === productExternalId ? { ...p, ...updated } : p)
         }
       ));
+      
       if (currentFeed?.id === feedId) setCurrentFeedState(prev => prev ? {
         ...prev,
         products: prev.products.map(p => p.externalId === productExternalId ? { ...p, ...updates } : p)
@@ -165,20 +178,76 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       // Находим id всех продуктов по externalId
       const feed = feeds.find(f => f.id === feedId);
       if (!feed) throw new Error('Feed not found');
-      const ids = feed.products.filter(p => productExternalIds.includes(p.externalId)).map(p => p.id);
-      await Promise.all(ids.map(id => updateProductSupabase(id, updates)));
+      
+      const productsToUpdate = feed.products.filter(p => productExternalIds.includes(p.externalId));
+      if (productsToUpdate.length === 0) throw new Error('No products found to update');
+      
+      // Подготавливаем данные для обновления
+      const updatesToSave = { ...updates };
+      
+      // Сохраняем сгенерированные AI поля, если они есть
+      if (updatesToSave.generatedName !== undefined || updatesToSave.generatedDescription !== undefined) {
+        // Просто проверяем наличие полей, сами данные уже включены в updatesToSave
+        console.log('Сохраняем AI-генерированный контент для', productsToUpdate.length, 'продуктов');
+      }
+      
+      // Обновляем все товары
+      const ids = productsToUpdate.map(p => p.id);
+      await Promise.all(ids.map(id => updateProductSupabase(id, updatesToSave)));
+      
+      // Обновляем локальное состояние
       setFeeds(prev => prev.map(feed =>
         feed.id !== feedId ? feed : {
           ...feed,
           products: feed.products.map(p => productExternalIds.includes(p.externalId) ? { ...p, ...updates } : p)
         }
       ));
+      
       if (currentFeed?.id === feedId) setCurrentFeedState(prev => prev ? {
         ...prev,
         products: prev.products.map(p => productExternalIds.includes(p.externalId) ? { ...p, ...updates } : p)
       } : prev);
     } catch (e: any) {
       setError(e.message || 'Ошибка при обновлении товаров');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteProduct = async (feedId: string, productId: string) => {
+    setIsLoading(true);
+    try {
+      // Находим продукт по id
+      const feed = feeds.find(f => f.id === feedId);
+      if (!feed) throw new Error('Feed not found');
+      
+      const product = feed.products.find(p => p.id === productId);
+      if (!product) throw new Error('Product not found');
+      
+      // Удаляем продукт из Supabase
+      await deleteProductSupabase(productId);
+      
+      // Обновляем локальное состояние
+      setFeeds(prev => prev.map(feed =>
+        feed.id !== feedId ? feed : {
+          ...feed,
+          products: feed.products.filter(p => p.id !== productId)
+        }
+      ));
+      
+      // Обновляем текущий фид, если это он
+      if (currentFeed?.id === feedId) {
+        setCurrentFeedState(prev => prev ? {
+          ...prev,
+          products: prev.products.filter(p => p.id !== productId)
+        } : prev);
+      }
+      
+      // Обновляем счетчик товаров
+      await updateFeedCounters(feedId);
+    } catch (e: any) {
+      setError(e.message || 'Ошибка при удалении товара');
+      throw e;
     } finally {
       setIsLoading(false);
     }
@@ -244,7 +313,8 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     importFeedFromXml,
     importLargeFeedFromXml,
     updateProduct,
-    updateProducts
+    updateProducts,
+    deleteProduct
   };
 
   return <FeedContext.Provider value={value}>{children}</FeedContext.Provider>;
