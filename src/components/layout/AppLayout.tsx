@@ -1,136 +1,193 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutGrid, Upload, Settings, Database, Bell, User, Menu } from 'lucide-react';
-import Button from './Button';
-import { AuthProvider, useAuth } from '../../context/AuthContext';
+import { Settings, Home, Upload, Menu, X, LogOut, User } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+
+// Компонент для отслеживания изменений URL
+function UrlTracker() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Сохраняем URL при каждом изменении маршрута
+    const currentPath = window.location.pathname + window.location.search;
+    localStorage.setItem('currentUrl', currentPath);
+    console.log('Сохранен URL:', currentPath);
+  }, [location]);
+  
+  return null;
+}
+
+type NavItemProps = {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+};
+
+// Модифицируем компонент Link для сохранения URL
+const SavedLink = (props: React.ComponentProps<typeof Link>) => {
+  const handleClick = () => {
+    // Сохраняем URL перед переходом
+    if (typeof props.to === 'string') {
+      localStorage.setItem('currentUrl', props.to);
+      console.log('SavedLink: сохранен URL:', props.to);
+    }
+  };
+  
+  return <Link {...props} onClick={handleClick} />;
+};
+
+function NavItem({ to, icon, label, active }: NavItemProps) {
+  return (
+    <div className={`mb-1 ${active ? 'bg-blue-50 text-blue-700' : ''}`}>
+      <SavedLink
+        to={to}
+        className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+          active
+            ? 'text-blue-700'
+            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+        }`}
+      >
+        <span className="mr-3">{icon}</span>
+        <span>{label}</span>
+      </SavedLink>
+    </div>
+  );
+}
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
-interface NavItemProps {
-  to: string;
-  icon: React.ReactNode;
-  text: string;
-  isActive: boolean;
-}
-
-const NavItem = ({ to, icon, text, isActive }: NavItemProps) => {
-  return (
-    <Link
-      to={to}
-      className={`flex items-center px-3 py-2 rounded-md transition-all duration-200 ${
-        isActive
-          ? 'bg-blue-100 text-blue-700'
-          : 'text-gray-600 hover:bg-gray-100'
-      }`}
-    >
-      <span className="flex-shrink-0 mr-2">{icon}</span>
-      <span className="font-medium">{text}</span>
-    </Link>
-  );
-};
-
-const AppLayout = ({ children }: AppLayoutProps) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { signOut } = useAuth();
+  const { isDarkMode } = useTheme();
   const location = useLocation();
-  const pathname = location.pathname;
-  const { user, signOut } = useAuth();
-
+  
+  // Закрывать меню при смене маршрута на мобильных устройствах
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+  
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
+  
   return (
-    <AuthProvider>
-      <div className="flex flex-col h-screen bg-gray-50 font-sans">
-        {/* Верхняя панель навигации */}
-        <header className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              {/* Логотип */}
-              <div className="flex items-center">
-                <Link to="/" className="flex items-center gap-2">
-                  <div className="flex items-center justify-center bg-blue-600 text-white rounded-md w-8 h-8">
-                    <Database className="h-4 w-4" />
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">FeedMaster</span>
-                </Link>
-              </div>
-              
-              {/* Навигация */}
-              <nav className="hidden md:flex items-center space-x-2">
-                <NavItem
-                  to="/"
-                  icon={<LayoutGrid className="h-5 w-5" />}
-                  text="Dashboard"
-                  isActive={pathname === '/'}
-                />
-                <NavItem
-                  to="/import"
-                  icon={<Upload className="h-5 w-5" />}
-                  text="Import Feed"
-                  isActive={pathname === '/import'}
-                />
-                <NavItem
-                  to="/settings"
-                  icon={<Settings className="h-5 w-5" />}
-                  text="Settings"
-                  isActive={pathname === '/settings'}
-                />
-              </nav>
-              
-              {/* Кнопки действий */}
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5" />
-                </Button>
-                {/* Отображение email и кнопка выхода */}
-                {user && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-700 text-sm">{user.email}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-500"
-                      aria-label="Выйти"
-                      onClick={signOut}
-                    >
-                      Выйти
-                    </Button>
-                  </div>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500"
-                  aria-label="User menu"
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-                
-                {/* Мобильное меню (видимо только на мобильных устройствах) */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="md:hidden text-gray-500"
-                  aria-label="Menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
+    <div className="flex h-screen overflow-hidden">
+      <UrlTracker />
+      
+      {/* Overlay для мобильных устройств */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-10 lg:hidden" 
+          onClick={toggleSidebar}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside 
+        className={`
+          fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-20 transition-transform duration-300 ease-in-out transform 
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          lg:relative lg:translate-x-0
+        `}
+      >
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+          <Link to="/" className="text-xl font-semibold text-blue-600 dark:text-blue-400">YML Feed Manager</Link>
+          <button 
+            className="lg:hidden p-2 rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" 
+            onClick={toggleSidebar}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <nav className="mt-4">
+          <ul className="space-y-2 px-2">
+            <li>
+              <Link 
+                to="/" 
+                className={`
+                  flex items-center px-3 py-2 rounded-md text-sm font-medium
+                  ${location.pathname === '/' 
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white'}
+                `}
+              >
+                <Home size={18} className="mr-3" />
+                Дашборд
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/import" 
+                className={`
+                  flex items-center px-3 py-2 rounded-md text-sm font-medium
+                  ${location.pathname === '/import' 
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white'}
+                `}
+              >
+                <Upload size={18} className="mr-3" />
+                Импорт фида
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/settings" 
+                className={`
+                  flex items-center px-3 py-2 rounded-md text-sm font-medium
+                  ${location.pathname === '/settings' 
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white'}
+                `}
+              >
+                <Settings size={18} className="mr-3" />
+                Настройки
+              </Link>
+            </li>
+          </ul>
+          <div className="px-3 mt-6 pb-3 border-t border-gray-200 dark:border-gray-700">
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center px-3 py-2 mt-4 w-full text-left rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white"
+            >
+              <LogOut size={18} className="mr-3" />
+              Выйти
+            </button>
+          </div>
+        </nav>
+      </aside>
+      
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center px-4 lg:px-6">
+          <button 
+            className="p-2 rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden" 
+            onClick={toggleSidebar}
+          >
+            <Menu size={24} />
+          </button>
+          <div className="ml-auto flex items-center">
+            <button className="p-1 rounded-full border border-gray-200 dark:border-gray-600 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <User size={20} />
+            </button>
           </div>
         </header>
-
-        {/* Основной контент */}
-        <main className="flex-1 overflow-auto bg-gray-50">
-          <div className="container mx-auto px-4 py-4">
-            {children}
-          </div>
+        
+        {/* Content */}
+        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+          {children}
         </main>
       </div>
-    </AuthProvider>
+    </div>
   );
 };
 

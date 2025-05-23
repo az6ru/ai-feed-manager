@@ -1,12 +1,16 @@
 import { AISettings, AIModel, Feed, Product, AIGenerationResult } from '../types/feed';
+import { getAiSettings, upsertAiSettings } from './supabaseClient';
 
 // Настройки по умолчанию
 const DEFAULT_AI_SETTINGS: AISettings = {
   apiKey: '',
   baseUrl: 'https://api.openai.com/v1',
   model: 'gpt-3.5-turbo',
+  defaultSystemPrompt: 'Ты опытный копирайтер для интернет-магазина. Твоя задача - создавать привлекательные и информативные названия и описания товаров.',
   defaultNamePrompt: 'Создай краткое и привлекательное название для товара на основе следующих данных: {{товар}}. Используй не более 60 символов.',
   defaultDescriptionPrompt: 'Создай привлекательное и информативное описание для товара на основе следующих данных: {{товар}}. Описание должно быть от 100 до 200 символов.',
+  defaultTitlePrompt: 'Создай краткий и информативный заголовок для товара на основе следующих данных: {{товар}}. Используй не более 100 символов.',
+  defaultSummaryPrompt: 'Создай краткое описание ключевых особенностей товара на основе следующих данных: {{товар}}. Используй не более 150 символов.',
   defaultLanguage: 'ru',
   defaultTone: 'профессиональный',
   defaultMaxTokens: 150
@@ -28,21 +32,53 @@ export class AIService {
   // Обновить настройки ИИ
   updateSettings(newSettings: Partial<AISettings>): void {
     this.settings = { ...this.settings, ...newSettings };
-    localStorage.setItem('aiSettings', JSON.stringify(this.settings));
   }
   
-  // Сохранить настройки ИИ
-  saveSettings(): void {
-    localStorage.setItem('aiSettings', JSON.stringify(this.settings));
+  // Загрузить настройки ИИ из Supabase
+  async loadSettingsFromSupabase(userId: string): Promise<AISettings> {
+    try {
+      console.log('Загрузка настроек AI из Supabase для пользователя:', userId);
+      const settings = await getAiSettings(userId);
+      
+      if (settings) {
+        console.log('Настройки AI успешно загружены:', settings);
+        // Обновляем только существующие поля
+        this.settings = { ...DEFAULT_AI_SETTINGS, ...settings };
+        return this.settings;
+      } else {
+        console.log('Настройки AI не найдены в базе данных, используем настройки по умолчанию');
+        return DEFAULT_AI_SETTINGS;
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке настроек AI из Supabase:', error);
+      return DEFAULT_AI_SETTINGS;
+    }
   }
   
-  // Загрузить настройки ИИ
+  // Сохранить настройки ИИ в Supabase
+  async saveSettingsToSupabase(userId: string): Promise<void> {
+    try {
+      console.log('Сохранение настроек AI в Supabase для пользователя:', userId);
+      await upsertAiSettings(userId, this.settings);
+      console.log('Настройки AI успешно сохранены');
+    } catch (error) {
+      console.error('Ошибка при сохранении настроек AI в Supabase:', error);
+      throw error;
+    }
+  }
+  
+  // Для обратной совместимости
   loadSettings(): AISettings {
     const savedSettings = localStorage.getItem('aiSettings');
     if (savedSettings) {
       this.settings = { ...DEFAULT_AI_SETTINGS, ...JSON.parse(savedSettings) };
     }
     return this.settings;
+  }
+  
+  // Для обратной совместимости
+  saveSettings(): void {
+    localStorage.setItem('aiSettings', JSON.stringify(this.settings));
   }
   
   // Получить список доступных моделей OpenAI

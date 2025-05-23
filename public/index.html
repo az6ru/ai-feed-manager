@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YML Feed Manager</title>
+  <script>
+    // Проверяем сохраненный URL
+    (function() {
+      // Если URL не соответствует сохраненному, перенаправляем
+      const savedUrl = localStorage.getItem('currentUrl');
+      if (savedUrl && window.location.pathname === '/') {
+        window.location.replace(savedUrl);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html> 

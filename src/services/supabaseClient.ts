@@ -167,26 +167,100 @@ export async function deleteFeedFromSupabase(feedId: string): Promise<void> {
 
 // --- AI Settings ---
 export async function getAiSettings(userId: string) {
-  const { data, error } = await supabase
-    .from('ai_settings')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
-  return data ? toCamelCase(data) : null;
+  try {
+    console.log('Получение настроек AI для пользователя:', userId);
+    
+    const { data, error } = await supabase
+      .from('ai_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (error && error.code !== 'PGRST116') {
+      console.error('Ошибка при получении настроек AI:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      console.log('Настройки AI не найдены для пользователя:', userId);
+      return null;
+    }
+    
+    console.log('Получены сырые настройки AI:', data);
+    
+    // Преобразуем snake_case в camelCase и маппим поля из базы данных в нужный формат
+    const result = {
+      apiKey: data.api_key || '',
+      baseUrl: data.base_url || 'https://api.openai.com/v1',
+      model: data.model || 'gpt-3.5-turbo',
+      defaultNamePrompt: data.default_name_prompt || '',
+      defaultDescriptionPrompt: data.default_description_prompt || '',
+      defaultTitlePrompt: data.default_title_prompt || '',
+      defaultSummaryPrompt: data.default_summary_prompt || '',
+      defaultLanguage: data.default_language || 'ru',
+      defaultTone: data.default_tone || 'профессиональный',
+      defaultMaxTokens: data.default_max_tokens || 150
+    };
+    
+    console.log('Преобразованные настройки AI:', result);
+    return result;
+  } catch (error) {
+    console.error('Исключение при получении настроек AI:', error);
+    throw error;
+  }
 }
 
 export async function upsertAiSettings(userId: string, values: Record<string, any>) {
-  const base = { ...values, userId };
-  if ('id' in base && !base.id) delete base.id;
-  const payload = toSnakeCase(base);
-  const { data, error } = await supabase
-    .from('ai_settings')
-    .upsert([payload], { onConflict: 'user_id' })
-    .select()
-    .single();
-  if (error) throw error;
-  return toCamelCase(data);
+  try {
+    console.log('Сохранение настроек AI для пользователя:', userId);
+    
+    // Преобразуем camelCase в snake_case
+    const payload = {
+      user_id: userId,
+      api_key: values.apiKey || '',
+      base_url: values.baseUrl || 'https://api.openai.com/v1',
+      model: values.model || 'gpt-3.5-turbo',
+      default_name_prompt: values.defaultNamePrompt || '',
+      default_description_prompt: values.defaultDescriptionPrompt || '',
+      default_title_prompt: values.defaultTitlePrompt || '',
+      default_summary_prompt: values.defaultSummaryPrompt || '',
+      default_language: values.defaultLanguage || 'ru',
+      default_tone: values.defaultTone || 'профессиональный',
+      default_max_tokens: values.defaultMaxTokens || 150
+    };
+    
+    console.log('Подготовленные данные для сохранения:', payload);
+    
+    const { data, error } = await supabase
+      .from('ai_settings')
+      .upsert([payload], { onConflict: 'user_id' })
+      .select()
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Ошибка при сохранении настроек AI:', error);
+      throw error;
+    }
+    
+    console.log('Настройки AI успешно сохранены, результат:', data);
+    
+    // Преобразуем обратно в camelCase для возврата
+    return {
+      apiKey: data?.api_key || '',
+      baseUrl: data?.base_url || 'https://api.openai.com/v1',
+      model: data?.model || 'gpt-3.5-turbo',
+      defaultNamePrompt: data?.default_name_prompt || '',
+      defaultDescriptionPrompt: data?.default_description_prompt || '',
+      defaultTitlePrompt: data?.default_title_prompt || '',
+      defaultSummaryPrompt: data?.default_summary_prompt || '',
+      defaultLanguage: data?.default_language || 'ru',
+      defaultTone: data?.default_tone || 'профессиональный',
+      defaultMaxTokens: data?.default_max_tokens || 150
+    };
+  } catch (error) {
+    console.error('Исключение при сохранении настроек AI:', error);
+    throw error;
+  }
 }
 
 export async function getOrCreateProfile(user: { id: string, email: string }) {
@@ -208,103 +282,241 @@ export async function getOrCreateProfile(user: { id: string, email: string }) {
 
 // --- FEEDS ---
 export async function getFeeds(userId: string) {
-  const { data, error } = await supabase
-    .from('feeds')
-    .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count, ai_settings')
-    .eq('user_id', userId);
-  if (error) throw error;
+  // Проверяем, что userId задан
+  if (!userId) {
+    console.error('getFeeds called with empty userId');
+    return [];
+  }
   
-  // Преобразуем ai_settings в aiSettings для всех фидов
-  const result = toCamelCase(data);
-  return result.map((feed: any) => {
-    if (feed.ai_settings) {
-      feed.aiSettings = toCamelCase(feed.ai_settings);
-      delete feed.ai_settings;
+  try {
+    // Сначала проверим структуру таблицы feeds, чтобы определить правильное имя поля
+    console.log('Checking feeds table structure');
+    
+    // Попробуем разные возможные имена поля для ID пользователя
+    const possibleUserIdFields = ['user_id', 'userId', 'owner_id', 'ownerId', 'created_by', 'createdBy'];
+    
+    // Дебаг-информация
+    console.log('Trying to fetch feeds with userId:', userId);
+    
+    // Основной запрос с user_id
+    let { data, error } = await supabase
+      .from('feeds')
+      .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count')
+      .eq('user_id', userId);
+    
+    if (error) {
+      console.warn('Error with user_id field, trying alternative fields:', error.message);
+      
+      // Пробуем альтернативные поля
+      for (const field of possibleUserIdFields.slice(1)) { // Пропускаем 'user_id', т.к. уже пробовали
+        console.log(`Trying with field: ${field}`);
+        
+        const result = await supabase
+          .from('feeds')
+          .select('id, name, date_created, date_modified, metadata, version, products_count, categories_count')
+          .eq(field, userId);
+        
+        if (!result.error && result.data && result.data.length > 0) {
+          console.log(`Found feeds using field: ${field}`);
+          data = result.data;
+          error = null;
+          break;
+        }
+      }
     }
-    return feed;
-  });
+    
+    if (error) {
+      console.error('Failed to fetch feeds with all field variations:', error);
+      throw error;
+    }
+    
+    console.log('Feeds fetched successfully:', data?.length || 0);
+    return toCamelCase(data || []);
+  } catch (e) {
+    console.error('Exception in getFeeds:', e);
+    throw e;
+  }
 }
 
 export async function getFeed(feedId: string) {
-  const { data, error } = await supabase
-    .from('feeds')
-    .select('*')
-    .eq('id', feedId)
-    .single();
-  if (error) throw error;
-  
-  // Преобразуем ai_settings в aiSettings для клиента
-  const result = toCamelCase(data);
-  if (result.ai_settings) {
-    result.aiSettings = toCamelCase(result.ai_settings);
-    delete result.ai_settings;
+  try {
+    // Получаем основные данные фида
+    const { data, error } = await supabase
+      .from('feeds')
+      .select('*')
+      .eq('id', feedId)
+      .single();
+      
+    if (error) {
+      console.error('Ошибка при получении фида:', error);
+      throw error;
+    }
+    
+    // Преобразуем результат в camelCase
+    const result = toCamelCase(data);
+    
+    // Загружаем настройки AI для фида из отдельной таблицы
+    try {
+      const aiSettings = await getFeedAiSettings(feedId);
+      if (aiSettings) {
+        result.aiSettings = aiSettings;
+      }
+    } catch (err) {
+      console.error('Ошибка при загрузке настроек AI для фида:', err);
+      // Не выбрасываем ошибку, чтобы не блокировать загрузку фида
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Исключение при получении фида:', error);
+    throw error;
   }
-  
-  return result;
 }
 
 export async function createFeed(feed: any) {
-  // Обработка aiSettings, если они присутствуют
-  const feedData = { ...feed };
-  
-  // Если есть настройки AI, преобразуем их в snake_case для базы данных
-  if (feedData.aiSettings) {
-    feedData.ai_settings = toSnakeCase(feedData.aiSettings);
-    delete feedData.aiSettings; // Удаляем оригинальное поле
+  try {
+    console.log('Создание нового фида:', feed);
+    
+    // Обработка aiSettings, если они присутствуют
+    const feedData = { ...feed };
+    const aiSettings = feedData.aiSettings;
+    
+    // Удаляем aiSettings из данных фида, так как они сохраняются в отдельной таблице
+    if (feedData.aiSettings) {
+      delete feedData.aiSettings;
+    }
+    
+    // Создаем новый фид
+    const { data, error } = await supabase
+      .from('feeds')
+      .insert([toSnakeCase(feedData)])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Ошибка при создании фида:', error);
+      throw error;
+    }
+    
+    // Преобразуем результат в camelCase
+    const result = toCamelCase(data);
+    
+    // Если были переданы настройки AI, сохраняем их в отдельную таблицу
+    if (aiSettings) {
+      console.log('Сохранение настроек AI для нового фида:', result.id, aiSettings);
+      try {
+        const savedAiSettings = await upsertFeedAiSettings(result.id, aiSettings);
+        result.aiSettings = savedAiSettings;
+      } catch (err) {
+        console.error('Ошибка при сохранении настроек AI для нового фида:', err);
+        // Не выбрасываем ошибку, чтобы не блокировать создание фида
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Исключение при создании фида:', error);
+    throw error;
   }
-  
-  const { data, error } = await supabase
-    .from('feeds')
-    .insert([toSnakeCase(feedData)])
-    .select()
-    .single();
-  if (error) throw error;
-  
-  // Преобразуем ai_settings обратно в aiSettings для клиента
-  const result = toCamelCase(data);
-  if (result.ai_settings) {
-    result.aiSettings = toCamelCase(result.ai_settings);
-    delete result.ai_settings;
-  }
-  
-  return result;
 }
 
 export async function updateFeed(feedId: string, updates: any) {
-  // Обработка aiSettings, если они присутствуют
-  const updatedData = { ...updates };
-  
-  // Если есть настройки AI, сериализуем их в JSON для хранения в БД
-  if (updatedData.aiSettings) {
-    updatedData.ai_settings = toSnakeCase(updatedData.aiSettings);
-    delete updatedData.aiSettings; // Удаляем оригинальное поле, чтобы избежать дублирования
+  try {
+    console.log('Обновление фида:', feedId, updates);
+    
+    // Обработка aiSettings, если они присутствуют
+    const updatedData = { ...updates };
+    const aiSettings = updatedData.aiSettings;
+    
+    // Удаляем aiSettings из данных фида, так как они сохраняются в отдельной таблице
+    if (updatedData.aiSettings) {
+      delete updatedData.aiSettings;
+    }
+    
+    // Обновляем основные данные фида
+    const { data, error } = await supabase
+      .from('feeds')
+      .update(toSnakeCase(updatedData))
+      .eq('id', feedId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Ошибка при обновлении фида:', error);
+      throw error;
+    }
+    
+    // Преобразуем результат в camelCase
+    const result = toCamelCase(data);
+    
+    // Если были переданы настройки AI, сохраняем их в отдельную таблицу
+    if (aiSettings) {
+      console.log('Сохранение настроек AI для фида:', feedId, aiSettings);
+      try {
+        const savedAiSettings = await upsertFeedAiSettings(feedId, aiSettings);
+        result.aiSettings = savedAiSettings;
+      } catch (err) {
+        console.error('Ошибка при сохранении настроек AI для фида:', err);
+        // Не выбрасываем ошибку, чтобы не блокировать обновление фида
+      }
+    } else {
+      // Если настройки не переданы, пробуем загрузить существующие
+      try {
+        const existingAiSettings = await getFeedAiSettings(feedId);
+        if (existingAiSettings) {
+          result.aiSettings = existingAiSettings;
+        }
+      } catch (err) {
+        console.error('Ошибка при загрузке настроек AI для фида:', err);
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Исключение при обновлении фида:', error);
+    throw error;
   }
-  
-  const { data, error } = await supabase
-    .from('feeds')
-    .update(toSnakeCase(updatedData))
-    .eq('id', feedId)
-    .select()
-    .single();
-  if (error) throw error;
-  
-  // Преобразуем ai_settings обратно в aiSettings для клиента
-  const result = toCamelCase(data);
-  if (result.ai_settings) {
-    result.aiSettings = toCamelCase(result.ai_settings);
-    delete result.ai_settings;
-  }
-  
-  return result;
 }
 
 export async function deleteFeed(feedId: string) {
-  const { error } = await supabase
-    .from('feeds')
-    .delete()
-    .eq('id', feedId);
-  if (error) throw error;
-  return true;
+  try {
+    console.log('Удаление фида:', feedId);
+    
+    // Сначала удаляем настройки AI для фида
+    try {
+      const { error: aiSettingsError } = await supabase
+        .from('feed_ai_settings')
+        .delete()
+        .eq('feed_id', feedId);
+      
+      if (aiSettingsError) {
+        console.warn('Ошибка при удалении настроек AI для фида:', aiSettingsError);
+        // Продолжаем выполнение, так как это не критическая ошибка
+      } else {
+        console.log('Настройки AI для фида успешно удалены');
+      }
+    } catch (err) {
+      console.warn('Исключение при удалении настроек AI для фида:', err);
+      // Продолжаем выполнение, так как это не критическая ошибка
+    }
+    
+    // Затем удаляем сам фид
+    const { error } = await supabase
+      .from('feeds')
+      .delete()
+      .eq('id', feedId);
+    
+    if (error) {
+      console.error('Ошибка при удалении фида:', error);
+      throw error;
+    }
+    
+    console.log('Фид успешно удален');
+    return true;
+  } catch (error) {
+    console.error('Исключение при удалении фида:', error);
+    throw error;
+  }
 }
 
 // --- CATEGORIES ---
@@ -380,45 +592,225 @@ export async function createProduct(product: any) {
 }
 
 export async function updateProduct(productId: string, updates: any) {
-  const { data, error } = await supabase
-    .from('products')
-    .update(toSnakeCase(updates))
-    .eq('id', productId)
-    .select()
-    .single();
-  if (error) throw error;
-  return toCamelCase(data);
+  try {
+    // Проверяем наличие продукта перед обновлением
+    const { data: existingProduct, error: checkError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('id', productId)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking product existence:', checkError);
+      throw checkError;
+    }
+    
+    if (!existingProduct) {
+      console.error('Product not found for update:', productId);
+      throw new Error(`Product with ID ${productId} not found`);
+    }
+    
+    // Выполняем обновление
+    const { data, error } = await supabase
+      .from('products')
+      .update(toSnakeCase(updates))
+      .eq('id', productId)
+      .select()
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+    
+    return toCamelCase(data);
+  } catch (error) {
+    console.error('Exception in updateProduct:', error);
+    throw error;
+  }
 }
 
 export async function deleteProduct(productId: string) {
-  const { error } = await supabase
-    .from('products')
-    .delete()
-    .eq('id', productId);
-  if (error) throw error;
-  return true;
+  try {
+    // Сначала проверяем, существует ли продукт
+    const { data: existingProduct, error: checkError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('id', productId)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking product existence:', checkError);
+      throw checkError;
+    }
+    
+    if (!existingProduct) {
+      console.error('Product not found for deletion:', productId);
+      throw new Error(`Product with ID ${productId} not found`);
+    }
+    
+    // Выполняем удаление
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+    
+    if (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Exception in deleteProduct:', error);
+    throw error;
+  }
 }
 
 // --- BATCH INSERT ---
 export async function batchInsertProducts(products: any[], feedId: string) {
   const BATCH_SIZE = 1000;
+  let successCount = 0;
+  let errorCount = 0;
+  
+  console.log(`Начинаем импорт ${products.length} товаров в фид ${feedId}`);
+  
   for (let i = 0; i < products.length; i += BATCH_SIZE) {
-    const batch = products.slice(i, i + BATCH_SIZE).map(p => {
-      const { externalId, ...rest } = p;
-      return { ...toSnakeCase(rest), feed_id: feedId, external_id: externalId };
+    const currentBatch = products.slice(i, i + BATCH_SIZE).map(p => {
+      const { externalId, categoryId, ...rest } = p;
+      return { 
+        ...toSnakeCase(rest), 
+        feed_id: feedId, 
+        external_id: externalId,
+        category_original_id: categoryId // Используем categoryId как original_id для категории
+      };
     });
-    const { error } = await supabase.from('products').insert(batch);
-    if (error) throw error;
+    
+    // Используем upsert вместо insert для обработки потенциальных дубликатов
+    // Важно: мы будем определять уникальность по комбинации (feed_id, external_id)
+    // Используем ON CONFLICT DO NOTHING, чтобы не обновлять существующие записи
+    try {
+      // Сначала пробуем вставку с ON CONFLICT
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .upsert(currentBatch, { 
+            onConflict: 'feed_id,external_id',
+            ignoreDuplicates: false // Мы обрабатываем дубликаты через onConflict
+          });
+        
+        if (error) {
+          // Если ошибка связана с отсутствием ограничения unique, используем обычный insert
+          if (error.code === '42P10') {
+            console.warn('Ограничение unique_feed_external_id не найдено, используем обычный insert');
+            const { error: insertError } = await supabase
+              .from('products')
+              .insert(currentBatch);
+            
+            if (insertError) {
+              throw insertError;
+            }
+          } else {
+            throw error;
+          }
+        }
+      } catch (upsertError: any) {
+        // Если ошибка связана с отсутствием ограничения unique, используем обычный insert
+        if (upsertError.code === '42P10') {
+          console.warn('Ограничение unique_feed_external_id не найдено, используем обычный insert');
+          const { error: insertError } = await supabase
+            .from('products')
+            .insert(currentBatch);
+          
+          if (insertError) {
+            throw insertError;
+          }
+        } else {
+          throw upsertError;
+        }
+      }
+      
+      console.log(`Успешно импортировано ${currentBatch.length} товаров (батч ${i / BATCH_SIZE + 1})`);
+      successCount += currentBatch.length;
+    } catch (err) {
+      console.error(`Исключение при импорте батча товаров (${i} - ${i + BATCH_SIZE}):`, err);
+      errorCount += BATCH_SIZE;
+    }
   }
+  
+  console.log(`Импорт товаров завершен: ${successCount} успешно, ${errorCount} с ошибками`);
 }
 
 export async function batchInsertCategories(categories: any[], feedId: string) {
   const BATCH_SIZE = 1000;
+  console.log(`Начинаем импорт ${categories.length} категорий в фид ${feedId}`);
+  let successCount = 0;
+  let errorCount = 0;
+  
   for (let i = 0; i < categories.length; i += BATCH_SIZE) {
-    const batch = categories.slice(i, i + BATCH_SIZE).map(c => ({ ...toSnakeCase(c), feed_id: feedId }));
-    const { error } = await supabase.from('categories').insert(batch);
-    if (error) throw error;
+    try {
+      const currentBatch = categories.slice(i, i + BATCH_SIZE).map(c => {
+        // Получаем оригинальный ID из категории (будет сохранён в поле original_id)
+        const originalId = c.id;
+        
+        // Создаем новый объект для вставки
+        return { 
+          ...toSnakeCase(c), 
+          feed_id: feedId, 
+          original_id: originalId, 
+          id: crypto.randomUUID() // Генерируем новый UUID для поля id
+        };
+      });
+      
+      // Сначала пробуем вставку с ON CONFLICT
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .upsert(currentBatch, { 
+            onConflict: 'feed_id,original_id',
+            ignoreDuplicates: false 
+          });
+          
+        if (error) {
+          // Если ошибка связана с отсутствием ограничения unique, используем обычный insert
+          if (error.code === '42P10') {
+            console.warn('Ограничение unique_feed_original_id не найдено, используем обычный insert');
+            const { error: insertError } = await supabase
+              .from('categories')
+              .insert(currentBatch);
+            
+            if (insertError) {
+              throw insertError;
+            }
+          } else {
+            throw error;
+          }
+        }
+      } catch (upsertError: any) {
+        // Если ошибка связана с отсутствием ограничения unique, используем обычный insert
+        if (upsertError.code === '42P10') {
+          console.warn('Ограничение unique_feed_original_id не найдено, используем обычный insert');
+          const { error: insertError } = await supabase
+            .from('categories')
+            .insert(currentBatch);
+          
+          if (insertError) {
+            throw insertError;
+          }
+        } else {
+          throw upsertError;
+        }
+      }
+      
+      console.log(`Успешно импортировано ${currentBatch.length} категорий (батч ${i / BATCH_SIZE + 1})`);
+      successCount += currentBatch.length;
+    } catch (err) {
+      console.error(`Исключение при импорте батча категорий (${i} - ${i + BATCH_SIZE}):`, err);
+      errorCount += BATCH_SIZE;
+    }
   }
+  
+  console.log(`Импорт категорий завершен: ${successCount} успешно, ${errorCount} с ошибками`);
 }
 
 // Функция для обновления счетчиков товаров и категорий
@@ -440,4 +832,104 @@ export async function updateFeedCounters(feedId: string) {
     .from('feeds')
     .update({ products_count: productsCount, categories_count: categoriesCount })
     .eq('id', feedId);
+}
+
+// --- FEED AI SETTINGS ---
+export async function getFeedAiSettings(feedId: string) {
+  try {
+    console.log('Получение настроек AI для фида:', feedId);
+    
+    const { data, error } = await supabase
+      .from('feed_ai_settings')
+      .select('*')
+      .eq('feed_id', feedId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Ошибка при получении настроек AI для фида:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      console.log('Настройки AI не найдены для фида:', feedId);
+      return null;
+    }
+    
+    console.log('Получены настройки AI для фида:', data);
+    
+    // Преобразуем snake_case в camelCase
+    const result = {
+      id: data.id,
+      feedId: data.feed_id,
+      namePrompt: data.name_prompt || '',
+      descriptionPrompt: data.description_prompt || '',
+      titlePrompt: data.title_prompt || '',
+      summaryPrompt: data.summary_prompt || '',
+      language: data.language || 'ru',
+      tone: data.tone || 'профессиональный',
+      maxTokens: data.max_tokens || 150
+    };
+    
+    return result;
+  } catch (error) {
+    console.error('Исключение при получении настроек AI для фида:', error);
+    throw error;
+  }
+}
+
+export async function upsertFeedAiSettings(feedId: string, settings: any) {
+  try {
+    console.log('Сохранение настроек AI для фида:', feedId, settings);
+    
+    // Проверяем, существуют ли уже настройки для этого фида
+    const { data: existingSettings } = await supabase
+      .from('feed_ai_settings')
+      .select('id')
+      .eq('feed_id', feedId)
+      .maybeSingle();
+    
+    // Подготавливаем данные в snake_case для сохранения
+    const payload = {
+      id: existingSettings?.id || crypto.randomUUID(),
+      feed_id: feedId,
+      name_prompt: settings.namePrompt || '',
+      description_prompt: settings.descriptionPrompt || '',
+      title_prompt: settings.titlePrompt || '',
+      summary_prompt: settings.summaryPrompt || '',
+      language: settings.language || 'ru',
+      tone: settings.tone || 'профессиональный',
+      max_tokens: settings.maxTokens || 150
+    };
+    
+    console.log('Сохраняем настройки AI для фида с данными:', payload);
+    
+    const { data, error } = await supabase
+      .from('feed_ai_settings')
+      .upsert([payload], { onConflict: 'id' })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Ошибка при сохранении настроек AI для фида:', error);
+      throw error;
+    }
+    
+    console.log('Настройки AI для фида успешно сохранены:', data);
+    
+    // Преобразуем обратно в camelCase
+    return {
+      id: data.id,
+      feedId: data.feed_id,
+      namePrompt: data.name_prompt || '',
+      descriptionPrompt: data.description_prompt || '',
+      titlePrompt: data.title_prompt || '',
+      summaryPrompt: data.summary_prompt || '',
+      language: data.language || 'ru',
+      tone: data.tone || 'профессиональный',
+      maxTokens: data.max_tokens || 150
+    };
+  } catch (error) {
+    console.error('Исключение при сохранении настроек AI для фида:', error);
+    throw error;
+  }
 } 

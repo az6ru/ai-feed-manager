@@ -325,10 +325,42 @@ function extractProducts(shop: any): Product[] {
   if (rawProducts.length > 0) {
     console.log('Пример товара:', JSON.stringify(rawProducts[0]).substring(0, 500));
   }
-  return rawProducts.map((product: any) => {
+  
+  // Создаем Set для проверки уникальности externalId
+  const usedExternalIds = new Set<string>();
+  
+  return rawProducts.map((product: any, index: number) => {
     let id = generateId(); // внутренний UUID
+    
+    // Получаем externalId или генерируем новый, если отсутствует
     let externalId = product['@_id'] || product.id || '';
+    
+    // Если externalId пустой, генерируем его из индекса и имени продукта
+    if (!externalId) {
+      const productName = product.name || product.n || product.title || 'unknown';
+      externalId = `ext_${index}_${productName.substring(0, 20).replace(/\s+/g, '_')}`;
+      console.log(`Сгенерирован externalId для товара без ID: ${externalId}`);
+    }
+    
+    // Проверяем, был ли такой externalId уже использован в текущем импорте
+    // Если да, добавляем случайный суффикс для обеспечения уникальности
+    let uniqueExternalId = externalId;
+    let counter = 1;
+    while (usedExternalIds.has(uniqueExternalId)) {
+      uniqueExternalId = `${externalId}_${counter}`;
+      counter++;
+    }
+    
+    // Добавляем ID в набор использованных
+    usedExternalIds.add(uniqueExternalId);
+    
+    // Сохраняем финальный externalId
+    externalId = uniqueExternalId;
     product.externalId = externalId;
+    
+    // Получаем categoryId (это будет использоваться как original_id для связи с категориями)
+    let categoryId = product.categoryId || product.category_id || '';
+    
     let pictures: string[] = [];
     if (product.picture) {
       if (Array.isArray(product.picture)) {
@@ -392,7 +424,7 @@ function extractProducts(shop: any): Product[] {
       price: parseFloat(product.price) || 0,
       oldPrice: parseNumberField(product.oldprice || product.old_price),
       currency: product.currencyId || product.currency || 'RUB',
-      categoryId: product.categoryId || product.category_id || '',
+      categoryId: categoryId, // Это будет использоваться как original_id категории
       url: product.url || '',
       pictures,
       available: normalizeAvailableStatus(product),
@@ -725,6 +757,10 @@ export async function processLargeYmlFile(
     
     // Обрабатываем товары батчами
     const batches = Math.ceil(totalOffers / batchSize);
+    
+    // Создаем Set для проверки уникальности externalId
+    const usedExternalIds = new Set<string>();
+    
     for (let i = 0; i < batches; i++) {
       const startIndex = i * batchSize;
       const endIndex = Math.min(startIndex + batchSize, totalOffers);
@@ -732,7 +768,7 @@ export async function processLargeYmlFile(
       console.log(`Processing batch ${i + 1}/${batches} (items ${startIndex + 1}-${endIndex})`);
       
       const batchOffers = rawOffers.slice(startIndex, endIndex);
-      const batchProducts = batchOffers.map((offer: any) => {
+      const batchProducts = batchOffers.map((offer: any, index: number) => {
         let attributes: any[] = [];
         if (offer.param) {
           attributes = Array.isArray(offer.param)
@@ -751,9 +787,35 @@ export async function processLargeYmlFile(
           }
         }
         
+        // Получаем externalId или генерируем новый, если отсутствует
+        const globalIndex = startIndex + index; // Глобальный индекс товара
+        let externalId = offer['@_id'] || offer.id || '';
+        
+        // Если externalId пустой, генерируем его из индекса и имени продукта
+        if (!externalId) {
+          const productName = offer.name || offer.n || offer.title || 'unknown';
+          externalId = `ext_${globalIndex}_${productName.substring(0, 20).replace(/\s+/g, '_')}`;
+          console.log(`Сгенерирован externalId для товара без ID: ${externalId}`);
+        }
+        
+        // Проверяем, был ли такой externalId уже использован в текущем импорте
+        // Если да, добавляем случайный суффикс для обеспечения уникальности
+        let uniqueExternalId = externalId;
+        let counter = 1;
+        while (usedExternalIds.has(uniqueExternalId)) {
+          uniqueExternalId = `${externalId}_${counter}`;
+          counter++;
+        }
+        
+        // Добавляем ID в набор использованных
+        usedExternalIds.add(uniqueExternalId);
+        
+        // Сохраняем финальный externalId
+        externalId = uniqueExternalId;
+        
         return {
           id: generateId(), // внутренний UUID
-          externalId: offer['@_id'] || offer.id || '', // внешний id из фида
+          externalId, // внешний id из фида (гарантированно уникальный)
           name: offer.name || offer.n || offer.title || 'Unknown Product',
           description: normalizeDescription(offer.description || offer.desc || ''),
           price: parseFloat(offer.price) || 0,

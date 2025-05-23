@@ -6,6 +6,7 @@ import {
 import { useFeed } from '../context/FeedContext';
 import { Product, Category, ProductAttribute } from '../types/feed';
 import { aiService } from '../services/aiService';
+import { useAuth } from '../context/AuthContext';
 
 // Импортируем компоненты из библиотеки
 import Card from '../components/layout/Card';
@@ -17,6 +18,7 @@ const ProductEditor = () => {
   const { feedId, productId } = useParams<{ feedId: string, productId: string }>();
   const navigate = useNavigate();
   const { feeds, currentFeed, setCurrentFeed, updateProduct, deleteProduct } = useFeed();
+  const { user } = useAuth();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
@@ -30,6 +32,15 @@ const ProductEditor = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
   const [currentModalImageIndex, setCurrentModalImageIndex] = useState(0);
+  
+  // Состояния для отслеживания процесса генерации AI
+  const [isGeneratingName, setIsGeneratingName] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  
+  // Состояния для работы со скидками
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [discountMode, setDiscountMode] = useState<'reducePrice' | 'increaseOldPrice'>('reducePrice');
   
   useEffect(() => {
     if (feedId) {
@@ -58,6 +69,22 @@ const ProductEditor = () => {
       }
     }
   }, [feedId, productId, feeds, setCurrentFeed, navigate]);
+  
+  // Обновление процента скидки при изменении цены или старой цены
+  useEffect(() => {
+    if (product && product.price && product.oldPrice) {
+      const calculatedDiscount = calculateDiscountPercent(product.price, product.oldPrice);
+      setDiscountPercent(calculatedDiscount);
+    } else {
+      setDiscountPercent(0);
+    }
+  }, [product?.price, product?.oldPrice]);
+  
+  // Вычисление скидки в процентах на основе price и oldPrice
+  const calculateDiscountPercent = (price: number, oldPrice: number | null | undefined): number => {
+    if (!oldPrice || oldPrice <= 0 || price <= 0) return 0;
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
+  };
   
   if (!product || !currentFeed) {
     return (
@@ -296,6 +323,83 @@ const ProductEditor = () => {
     setCurrentModalImageIndex(newIndex);
   };
   
+  const handleGenerateName = async () => {
+    if (!product || !user) return;
+    
+    setIsGeneratingName(true);
+    setGenerationError(null);
+    
+    try {
+      // Загружаем настройки AI перед генерацией
+      await aiService.loadSettingsFromSupabase(user.id);
+      
+      const generatedName = await aiService.generateName(
+        product,
+        currentFeed?.aiSettings?.namePrompt || undefined
+      );
+      
+      // Обновляем только generatedName, но не применяем автоматически
+      handleChange('generatedName', generatedName);
+      
+    } catch (error) {
+      console.error('Ошибка при генерации названия:', error);
+      setGenerationError('Не удалось сгенерировать название. Проверьте настройки ИИ.');
+    } finally {
+      setIsGeneratingName(false);
+    }
+  };
+  
+  const handleGenerateDescription = async () => {
+    if (!product || !user) return;
+    
+    setIsGeneratingDescription(true);
+    setGenerationError(null);
+    
+    try {
+      // Загружаем настройки AI перед генерацией
+      await aiService.loadSettingsFromSupabase(user.id);
+      
+      const generatedDescription = await aiService.generateDescription(
+        product,
+        currentFeed?.aiSettings?.descriptionPrompt || undefined
+      );
+      
+      // Обновляем только generatedDescription, но не применяем автоматически
+      handleChange('generatedDescription', generatedDescription);
+      
+    } catch (error) {
+      console.error('Ошибка при генерации описания:', error);
+      setGenerationError('Не удалось сгенерировать описание. Проверьте настройки ИИ.');
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+  
+  // Применение скидки к цене товара
+  const applyDiscount = () => {
+    if (!product || discountPercent <= 0) return;
+    
+    const currentPrice = parseFloat(String(product.price));
+    let newPrice = currentPrice;
+    let newOldPrice = product.oldPrice ? parseFloat(String(product.oldPrice)) : currentPrice;
+    
+    if (discountMode === 'reducePrice') {
+      // Режим 1: Снижаем текущую цену на процент скидки
+      newOldPrice = currentPrice;
+      newPrice = parseFloat((currentPrice * (1 - discountPercent / 100)).toFixed(2));
+    } else {
+      // Режим 2: Рассчитываем oldPrice так, чтобы при скидке получить текущую цену
+      newPrice = currentPrice;
+      newOldPrice = parseFloat((currentPrice / (1 - discountPercent / 100)).toFixed(2));
+    }
+    
+    setProduct({
+      ...product,
+      price: newPrice,
+      oldPrice: newOldPrice
+    });
+  };
+  
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="mb-4 flex items-center">
@@ -381,28 +485,41 @@ const ProductEditor = () => {
             <Button
               type="button"
               aria-label="Сгенерировать название AI"
-              onClick={async () => {
-                if (!product) return;
-                try {
-                  const generatedName = await aiService.generateName(
-                    product,
-                    currentFeed.aiSettings?.namePrompt || undefined
-                  );
-                  handleChange('generatedName', generatedName);
-                  handleChange('name', generatedName);
-                } catch (error) {
-                  console.error('Ошибка при генерации названия:', error);
-                  alert('Не удалось сгенерировать название. Проверьте настройки ИИ.');
-                }
-              }}
+              onClick={handleGenerateName}
               variant="ghost"
               size="sm"
-              leftIcon={<Sparkles className="w-4 h-4" />}
-              className="absolute right-0 top-0 bottom-0 h-full px-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 rounded-r-md border-l border-gray-200"
+              leftIcon={isGeneratingName ? null : <Sparkles className="w-4 h-4" />}
+              className={`absolute right-0 top-0 bottom-0 h-full px-3 ${
+                isGeneratingName ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+              } rounded-r-md border-l border-gray-200 flex items-center justify-center`}
               style={{ minWidth: 0 }}
-              children={null}
-            />
+              disabled={isGeneratingName}
+            >
+              {isGeneratingName && (
+                <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+            </Button>
           </div>
+          
+          {generationError && (
+            <div className="mt-2 p-2 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+              {generationError}
+            </div>
+          )}
+          
+          {isGeneratingName && (
+            <div className="mt-2 p-2 bg-blue-50 text-blue-700 text-sm rounded-md border border-blue-200 flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Генерация названия с помощью ИИ...
+            </div>
+          )}
+          
           {product.generatedName && product.generatedName !== product.name && (
             <AIGenerated
               title="Сгенерированное название:"
@@ -433,28 +550,34 @@ const ProductEditor = () => {
             <Button
               type="button"
               aria-label="Сгенерировать описание AI"
-              onClick={async () => {
-                if (!product) return;
-                try {
-                  const generatedDescription = await aiService.generateDescription(
-                    product,
-                    currentFeed.aiSettings?.descriptionPrompt || undefined
-                  );
-                  handleChange('generatedDescription', generatedDescription);
-                  handleChange('description', generatedDescription);
-                } catch (error) {
-                  console.error('Ошибка при генерации описания:', error);
-                  alert('Не удалось сгенерировать описание. Проверьте настройки ИИ.');
-                }
-              }}
+              onClick={handleGenerateDescription}
               variant="ghost"
               size="sm"
-              leftIcon={<Sparkles className="w-4 h-4" />}
-              className="absolute right-0 top-0 bottom-0 h-full flex items-center px-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 rounded-r-md border-l border-gray-200"
+              leftIcon={isGeneratingDescription ? null : <Sparkles className="w-4 h-4" />}
+              className={`absolute right-0 top-0 flex items-center px-3 ${
+                isGeneratingDescription ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+              } rounded-r-md border-l border-gray-200`}
               style={{ minWidth: 0 }}
-              children={null}
-            />
+              disabled={isGeneratingDescription}
+            >
+              {isGeneratingDescription && (
+                <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+            </Button>
           </div>
+          
+          {isGeneratingDescription && (
+            <div className="mt-2 p-2 bg-blue-50 text-blue-700 text-sm rounded-md border border-blue-200 flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Генерация описания с помощью ИИ...
+            </div>
+          )}
           
           {product.generatedDescription && product.generatedDescription !== product.description && (
             <AIGenerated
@@ -503,7 +626,7 @@ const ProductEditor = () => {
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {product.pictures.map((img, idx) => (
                     <div 
-                      key={idx}
+                      key={`thumb-${idx}`}
                       className={`aspect-square cursor-pointer border-2 rounded-md overflow-hidden transition-all duration-150 ease-in-out ${
                         img === (currentImage || product.pictures?.[0]) 
                           ? 'border-blue-500 ring-2 ring-blue-200' 
@@ -571,6 +694,76 @@ const ProductEditor = () => {
             onChange={handleInputChange}
             className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
           />
+          {product.price && product.oldPrice && product.oldPrice > product.price && (
+            <div className="mt-1 text-sm text-green-600">
+              Скидка: {calculateDiscountPercent(product.price, product.oldPrice)}%
+            </div>
+          )}
+        </Field>
+        
+        {/* Discount Field */}
+        <Field 
+          label="Скидка (%)" 
+          htmlFor="discountPercent"
+        >
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                id="discountPercent"
+                min="0"
+                max="99"
+                step="1"
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
+              />
+              <Button
+                type="button"
+                onClick={applyDiscount}
+                variant="outline"
+                size="sm"
+                disabled={discountPercent <= 0}
+              >
+                Применить
+              </Button>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="reducePrice"
+                  name="discountMode"
+                  checked={discountMode === 'reducePrice'}
+                  onChange={() => setDiscountMode('reducePrice')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="reducePrice" className="ml-2 block text-sm text-gray-700">
+                  Снизить текущую цену
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="increaseOldPrice"
+                  name="discountMode"
+                  checked={discountMode === 'increaseOldPrice'}
+                  onChange={() => setDiscountMode('increaseOldPrice')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="increaseOldPrice" className="ml-2 block text-sm text-gray-700">
+                  Рассчитать старую цену
+                </label>
+              </div>
+            </div>
+            
+            <div className="text-xs text-gray-500">
+              {discountMode === 'reducePrice' 
+                ? 'Текущая цена станет старой ценой, новая цена будет снижена на указанный процент' 
+                : 'Текущая цена останется без изменений, старая цена будет рассчитана с учетом скидки'}
+            </div>
+          </div>
         </Field>
         
         {/* Currency Field */}

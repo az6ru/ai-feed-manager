@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { signIn, signUp, signOut, getCurrentUser } from '../services/supabaseClient';
+import { signIn, signUp, signOut, getCurrentUser, getOrCreateProfile } from '../services/supabaseClient';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -18,7 +18,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Проверяем текущего пользователя при инициализации
-    getCurrentUser().then(setUser).finally(() => setLoading(false));
+    getCurrentUser().then(async (currentUser) => {
+      setUser(currentUser);
+      // Если пользователь авторизован, создаем или получаем его профиль
+      if (currentUser && currentUser.email) {
+        try {
+          await getOrCreateProfile({
+            id: currentUser.id,
+            email: currentUser.email
+          });
+          console.log('Профиль пользователя получен/создан');
+        } catch (error) {
+          console.error('Ошибка при получении/создании профиля:', error);
+        }
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleSignIn = async (email: string, password: string) => {
@@ -27,6 +41,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data, error } = await signIn(email, password);
       if (error) throw error;
       setUser(data.user);
+      
+      // Создаем или получаем профиль пользователя после авторизации
+      if (data.user && data.user.email) {
+        try {
+          await getOrCreateProfile({
+            id: data.user.id,
+            email: data.user.email
+          });
+          console.log('Профиль пользователя получен/создан после входа');
+        } catch (profileError) {
+          console.error('Ошибка при получении/создании профиля после входа:', profileError);
+        }
+      }
+      
       return { data };
     } catch (error) {
       throw error;
@@ -41,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data, error } = await signUp(email, password);
       if (error) throw error;
       setUser(data.user);
+      // При регистрации профиль будет создан автоматически при первом входе
       return { data };
     } catch (error) {
       throw error;

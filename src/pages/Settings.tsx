@@ -6,13 +6,15 @@ import {
   Shield, 
   Star, 
   Activity,
-  Check
+  Check,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import AISettingsForm from '../components/AISettingsForm';
 import { AISettings } from '../types/feed';
 import { aiService } from '../services/aiService';
 import { getAiSettings, upsertAiSettings, getOrCreateProfile } from '../services/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface SettingItem {
   id: string;
@@ -39,12 +41,14 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   
+  const { theme, toggleTheme } = useTheme();
+  
   const [settings, setSettings] = useState({
     enableAiFeatures: true,
     enableAutomaticExport: false,
     validateBeforeExport: true,
     sendNotifications: true,
-    darkMode: false,
+    darkMode: theme === 'dark',
     exportFormat: 'xml'
   });
   
@@ -88,13 +92,18 @@ const Settings = () => {
   useEffect(() => {
     if (user) {
       setAiLoading(true);
-      getOrCreateProfile(user)
-        .then(() => getAiSettings(user.id))
-        .then(data => {
-          if (data) setAiSettings(data);
+      
+      // Используем новый метод для загрузки настроек AI из Supabase
+      aiService.loadSettingsFromSupabase(user.id)
+        .then(settings => {
+          console.log('Настройки AI загружены:', settings);
+          setAiSettings(settings);
           setAiError(null);
         })
-        .catch(e => setAiError('Ошибка загрузки AI-настроек или профиля'))
+        .catch(error => {
+          console.error('Ошибка при загрузке настроек AI:', error);
+          setAiError('Ошибка загрузки AI-настроек: ' + (error.message || 'Неизвестная ошибка'));
+        })
         .finally(() => setAiLoading(false));
     }
   }, [user]);
@@ -105,11 +114,17 @@ const Settings = () => {
     setAiError(null);
     setAiSuccess(null);
     try {
-      await getOrCreateProfile(user);
-      await upsertAiSettings(user.id, settings);
+      // Обновляем настройки в сервисе
+      aiService.updateSettings(settings);
+      
+      // Сохраняем настройки в Supabase
+      await aiService.saveSettingsToSupabase(user.id);
+      
+      // Обновляем локальное состояние
       setAiSettings(settings);
       setAiSuccess('Настройки успешно сохранены!');
     } catch (e: any) {
+      console.error('Ошибка при сохранении настроек AI:', e);
       setAiError(e.message || 'Ошибка сохранения AI-настроек');
     } finally {
       setAiLoading(false);
@@ -118,10 +133,18 @@ const Settings = () => {
   };
   
   const handleSettingChange = (settingName: keyof typeof settings) => {
-    setSettings({
-      ...settings,
-      [settingName]: !settings[settingName]
-    });
+    if (settingName === 'darkMode') {
+      toggleTheme();
+      setSettings({
+        ...settings,
+        darkMode: !settings.darkMode
+      });
+    } else {
+      setSettings({
+        ...settings,
+        [settingName]: !settings[settingName]
+      });
+    }
   };
   
   const handleExportFormatChange = (format: string) => {
@@ -151,22 +174,22 @@ const Settings = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage your preferences and export settings
         </p>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="flex -mb-px" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('general')}
               className={`
                 py-4 px-6 text-sm font-medium border-b-2 focus:outline-none
                 ${activeTab === 'general'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                 }
               `}
             >
@@ -177,8 +200,8 @@ const Settings = () => {
               className={`
                 py-4 px-6 text-sm font-medium border-b-2 focus:outline-none
                 ${activeTab === 'export'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                 }
               `}
             >
@@ -189,8 +212,8 @@ const Settings = () => {
               className={`
                 py-4 px-6 text-sm font-medium border-b-2 focus:outline-none
                 ${activeTab === 'ai'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                 }
               `}
             >
@@ -201,8 +224,8 @@ const Settings = () => {
               className={`
                 py-4 px-6 text-sm font-medium border-b-2 focus:outline-none
                 ${activeTab === 'notifications'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                 }
               `}
             >
@@ -214,15 +237,15 @@ const Settings = () => {
         <div className="p-6">
           {activeTab === 'general' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900">General Settings</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">General Settings</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900">Theme</h4>
-                    <p className="text-sm text-gray-500">Choose your preferred interface theme</p>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">Theme</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Choose your preferred interface theme</p>
                   </div>
                   <div className="flex items-center">
-                    <span className={`mr-3 text-sm ${!settings.darkMode ? 'font-medium text-gray-900' : 'text-gray-500'}`}>
+                    <span className={`mr-3 text-sm ${!settings.darkMode ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                       Light
                     </span>
                     <button
@@ -231,18 +254,18 @@ const Settings = () => {
                       className={`
                         relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer 
                         transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                        ${settings.darkMode ? 'bg-blue-600' : 'bg-gray-200'}
+                        ${settings.darkMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
                       `}
                     >
                       <span
                         className={`
-                          pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 
+                          pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform ring-0 
                           transition ease-in-out duration-200
                           ${settings.darkMode ? 'translate-x-5' : 'translate-x-0'}
                         `}
                       />
                     </button>
-                    <span className={`ml-3 text-sm ${settings.darkMode ? 'font-medium text-gray-900' : 'text-gray-500'}`}>
+                    <span className={`ml-3 text-sm ${settings.darkMode ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                       Dark
                     </span>
                   </div>
@@ -250,8 +273,8 @@ const Settings = () => {
                 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900">Validate before export</h4>
-                    <p className="text-sm text-gray-500">Automatically check for errors before exporting</p>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">Validate before export</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Automatically check for errors before exporting</p>
                   </div>
                   <button
                     onClick={() => handleSettingChange('validateBeforeExport')}
@@ -259,12 +282,12 @@ const Settings = () => {
                     className={`
                       relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer 
                       transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                      ${settings.validateBeforeExport ? 'bg-blue-600' : 'bg-gray-200'}
+                      ${settings.validateBeforeExport ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
                     `}
                   >
                     <span
                       className={`
-                        pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 
+                        pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform ring-0 
                         transition ease-in-out duration-200
                         ${settings.validateBeforeExport ? 'translate-x-5' : 'translate-x-0'}
                       `}
@@ -274,8 +297,8 @@ const Settings = () => {
                 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900">Automatic export</h4>
-                    <p className="text-sm text-gray-500">Automatically export changes when saving</p>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">Automatic export</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Automatically export changes when saving</p>
                   </div>
                   <button
                     onClick={() => handleSettingChange('enableAutomaticExport')}
@@ -283,12 +306,12 @@ const Settings = () => {
                     className={`
                       relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer 
                       transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                      ${settings.enableAutomaticExport ? 'bg-blue-600' : 'bg-gray-200'}
+                      ${settings.enableAutomaticExport ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
                     `}
                   >
                     <span
                       className={`
-                        pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 
+                        pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform ring-0 
                         transition ease-in-out duration-200
                         ${settings.enableAutomaticExport ? 'translate-x-5' : 'translate-x-0'}
                       `}
@@ -301,10 +324,10 @@ const Settings = () => {
           
           {activeTab === 'export' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900">Export Settings</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Export Settings</h3>
               
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Export Format</h4>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Export Format</h4>
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <input
@@ -315,7 +338,7 @@ const Settings = () => {
                       onChange={() => handleExportFormatChange('xml')}
                       className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="format-xml" className="ml-3 text-sm text-gray-700">
+                    <label htmlFor="format-xml" className="ml-3 text-sm text-gray-700 dark:text-gray-300">
                       XML (Standard YML)
                     </label>
                   </div>
@@ -328,7 +351,7 @@ const Settings = () => {
                       onChange={() => handleExportFormatChange('json')}
                       className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="format-json" className="ml-3 text-sm text-gray-700">
+                    <label htmlFor="format-json" className="ml-3 text-sm text-gray-700 dark:text-gray-300">
                       JSON
                     </label>
                   </div>
@@ -341,7 +364,7 @@ const Settings = () => {
                       onChange={() => handleExportFormatChange('csv')}
                       className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="format-csv" className="ml-3 text-sm text-gray-700">
+                    <label htmlFor="format-csv" className="ml-3 text-sm text-gray-700 dark:text-gray-300">
                       CSV
                     </label>
                   </div>
@@ -349,8 +372,8 @@ const Settings = () => {
               </div>
               
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Export Presets</h4>
-                <p className="text-sm text-gray-500 mb-4">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Export Presets</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   Select the platforms you want to export to
                 </p>
                 
@@ -361,20 +384,20 @@ const Settings = () => {
                       onClick={() => togglePreset(preset.id)}
                       className={`
                         relative rounded-lg border p-4 hover:border-blue-200 cursor-pointer
-                        ${preset.active ? 'bg-blue-50 border-blue-300' : 'border-gray-200'}
+                        ${preset.active ? 'bg-blue-50 border-blue-300' : 'border-gray-200 dark:border-gray-700'}
                       `}
                     >
                       <div className="flex justify-between">
                         <div className="flex items-center">
                           <div className="flex-shrink-0">{preset.icon}</div>
                           <div className="ml-3">
-                            <h3 className="text-sm font-medium text-gray-900">{preset.title}</h3>
-                            <p className="text-xs text-gray-500">{preset.description}</p>
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{preset.title}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{preset.description}</p>
                           </div>
                         </div>
                         <div className={`
                           h-5 w-5 rounded-full flex items-center justify-center 
-                          ${preset.active ? 'bg-blue-600' : 'border border-gray-300'}
+                          ${preset.active ? 'bg-blue-600' : 'border border-gray-300 dark:border-gray-600'}
                         `}>
                           {preset.active && <Check className="h-3 w-3 text-white" />}
                         </div>
@@ -390,8 +413,8 @@ const Settings = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">AI Enhancement Features</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">AI Enhancement Features</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Control the AI-powered features for improving your product data
                   </p>
                 </div>
@@ -401,12 +424,12 @@ const Settings = () => {
                   className={`
                     relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer 
                     transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                    ${settings.enableAiFeatures ? 'bg-blue-600' : 'bg-gray-200'}
+                    ${settings.enableAiFeatures ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
                   `}
                 >
                   <span
                     className={`
-                      pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 
+                      pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform ring-0 
                       transition ease-in-out duration-200
                       ${settings.enableAiFeatures ? 'translate-x-5' : 'translate-x-0'}
                     `}
@@ -435,8 +458,8 @@ const Settings = () => {
                         <Activity className="h-5 w-5 text-green-500" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">Description Enhancement</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Description Enhancement</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           AI will suggest improved product descriptions to increase conversions
                         </p>
                       </div>
@@ -448,8 +471,8 @@ const Settings = () => {
                         <Shield className="h-5 w-5 text-blue-500" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">Data Validation</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Data Validation</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           AI checks for inconsistencies, errors, and quality issues in your feed
                         </p>
                       </div>
@@ -461,8 +484,8 @@ const Settings = () => {
                         <Star className="h-5 w-5 text-yellow-500" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">Attribute Suggestions</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Attribute Suggestions</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           AI will recommend additional product attributes to improve searchability
                         </p>
                       </div>
@@ -477,8 +500,8 @@ const Settings = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Notification Settings</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Notification Settings</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Manage how and when you receive notifications
                   </p>
                 </div>
@@ -488,12 +511,12 @@ const Settings = () => {
                   className={`
                     relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer 
                     transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                    ${settings.sendNotifications ? 'bg-blue-600' : 'bg-gray-200'}
+                    ${settings.sendNotifications ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
                   `}
                 >
                   <span
                     className={`
-                      pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 
+                      pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-200 shadow transform ring-0 
                       transition ease-in-out duration-200
                       ${settings.sendNotifications ? 'translate-x-5' : 'translate-x-0'}
                     `}
@@ -508,8 +531,8 @@ const Settings = () => {
                       <div className="flex items-center">
                         <Bell className="h-5 w-5 text-blue-500" />
                         <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">Export Completed</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Export Completed</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Get notified when a feed export is completed
                           </p>
                         </div>
@@ -529,8 +552,8 @@ const Settings = () => {
                       <div className="flex items-center">
                         <Bell className="h-5 w-5 text-yellow-500" />
                         <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">Validation Warnings</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Validation Warnings</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Get notified about issues found during validation
                           </p>
                         </div>
@@ -550,8 +573,8 @@ const Settings = () => {
                       <div className="flex items-center">
                         <Bell className="h-5 w-5 text-red-500" />
                         <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">Export Errors</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Export Errors</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             Get notified when an export fails
                           </p>
                         </div>
@@ -576,7 +599,7 @@ const Settings = () => {
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleSaveSettings}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           <Save className="w-5 h-5 mr-2" />
           Save Settings
@@ -585,7 +608,7 @@ const Settings = () => {
       
       {/* Save notification */}
       {showSaveNotification && (
-        <div className="fixed bottom-4 right-4 bg-green-50 text-green-800 px-4 py-3 rounded-md shadow-lg flex items-center">
+        <div className="fixed bottom-4 right-4 bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-200 px-4 py-3 rounded-md shadow-lg flex items-center">
           <Check className="w-5 h-5 mr-2" />
           Settings saved successfully
         </div>

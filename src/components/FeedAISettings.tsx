@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, FeedAISettings } from '../types/feed';
+import { Feed, FeedAISettings, AISettings } from '../types/feed';
 import { aiService } from '../services/aiService';
 
 interface FeedAISettingsProps {
@@ -24,11 +24,12 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   }>({});
   
   // Инициализируем состояние из настроек фида или используем глобальные настройки как запасной вариант
-  const [settings, setSettings] = useState<FeedAISettings>({
+  const [feedSettings, setFeedSettings] = useState<FeedAISettings>({
     namePrompt: feed.aiSettings?.namePrompt || globalSettings.defaultNamePrompt,
     descriptionPrompt: feed.aiSettings?.descriptionPrompt || globalSettings.defaultDescriptionPrompt,
     titlePrompt: feed.aiSettings?.titlePrompt || globalSettings.defaultTitlePrompt || 'Создай привлекательный заголовок для фида {{товар}}',
     summaryPrompt: feed.aiSettings?.summaryPrompt || globalSettings.defaultSummaryPrompt || 'Создай краткое описание всего фида на основе {{товар}}',
+    systemPrompt: feed.aiSettings?.systemPrompt || globalSettings.defaultSystemPrompt,
     language: feed.aiSettings?.language || globalSettings.defaultLanguage,
     tone: feed.aiSettings?.tone || globalSettings.defaultTone,
     maxTokens: feed.aiSettings?.maxTokens || globalSettings.defaultMaxTokens
@@ -54,44 +55,44 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   // Проверка целостности настроек при монтировании компонента
   useEffect(() => {
     // Проверяем, что промпты не undefined/null
-    if (!settings.namePrompt) {
+    if (!feedSettings.namePrompt) {
       console.warn('FeedAISettingsForm: Промпт для названий undefined, устанавливаем значение по умолчанию');
-      setSettings(prev => ({
+      setFeedSettings(prev => ({
         ...prev,
         namePrompt: globalSettings.defaultNamePrompt
       }));
     }
     
-    if (!settings.descriptionPrompt) {
+    if (!feedSettings.descriptionPrompt) {
       console.warn('FeedAISettingsForm: Промпт для описаний undefined, устанавливаем значение по умолчанию');
-      setSettings(prev => ({
+      setFeedSettings(prev => ({
         ...prev,
         descriptionPrompt: globalSettings.defaultDescriptionPrompt
       }));
     }
     
-    if (!settings.titlePrompt) {
+    if (!feedSettings.titlePrompt) {
       console.warn('FeedAISettingsForm: Промпт для заголовка фида undefined, устанавливаем значение по умолчанию');
-      setSettings(prev => ({
+      setFeedSettings(prev => ({
         ...prev,
         titlePrompt: globalSettings.defaultTitlePrompt || 'Создай привлекательный заголовок для фида {{товар}}'
       }));
     }
     
-    if (!settings.summaryPrompt) {
+    if (!feedSettings.summaryPrompt) {
       console.warn('FeedAISettingsForm: Промпт для описания фида undefined, устанавливаем значение по умолчанию');
-      setSettings(prev => ({
+      setFeedSettings(prev => ({
         ...prev,
         summaryPrompt: globalSettings.defaultSummaryPrompt || 'Создай краткое описание всего фида на основе {{товар}}'
       }));
     }
   }, []);
   
-  // Обработка изменений в полях формы
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // Обработка изменений в полях формы для настроек фида
+  const handleFeedSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    setSettings(prev => ({
+    setFeedSettings(prev => ({
       ...prev,
       [name]: name === 'maxTokens' ? parseInt(value, 10) : value
     }));
@@ -120,19 +121,20 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     }
     setShopUrlError(null);
     
-    console.log('Сохранение настроек AI для фида. Текущие настройки:', settings);
-    console.log('Промпт для названий перед сохранением:', settings.namePrompt);
-    console.log('Промпт для описаний перед сохранением:', settings.descriptionPrompt);
+    console.log('Сохранение настроек AI для фида. Текущие настройки:', feedSettings);
+    console.log('Промпт для названий перед сохранением:', feedSettings.namePrompt);
+    console.log('Промпт для описаний перед сохранением:', feedSettings.descriptionPrompt);
     
     // Проверяем, что промпты не пустые
     const finalSettings: FeedAISettings = {
-      namePrompt: settings.namePrompt?.trim() || globalSettings.defaultNamePrompt,
-      descriptionPrompt: settings.descriptionPrompt?.trim() || globalSettings.defaultDescriptionPrompt,
-      titlePrompt: settings.titlePrompt?.trim() || globalSettings.defaultTitlePrompt || 'Создай привлекательный заголовок для фида {{товар}}',
-      summaryPrompt: settings.summaryPrompt?.trim() || globalSettings.defaultSummaryPrompt || 'Создай краткое описание всего фида на основе {{товар}}',
-      language: settings.language || globalSettings.defaultLanguage,
-      tone: settings.tone || globalSettings.defaultTone,
-      maxTokens: settings.maxTokens || globalSettings.defaultMaxTokens
+      namePrompt: feedSettings.namePrompt?.trim() || globalSettings.defaultNamePrompt,
+      descriptionPrompt: feedSettings.descriptionPrompt?.trim() || globalSettings.defaultDescriptionPrompt,
+      titlePrompt: feedSettings.titlePrompt?.trim() || globalSettings.defaultTitlePrompt || 'Создай привлекательный заголовок для фида {{товар}}',
+      summaryPrompt: feedSettings.summaryPrompt?.trim() || globalSettings.defaultSummaryPrompt || 'Создай краткое описание всего фида на основе {{товар}}',
+      systemPrompt: feedSettings.systemPrompt?.trim() || globalSettings.defaultSystemPrompt,
+      language: feedSettings.language || globalSettings.defaultLanguage,
+      tone: feedSettings.tone || globalSettings.defaultTone,
+      maxTokens: feedSettings.maxTokens || globalSettings.defaultMaxTokens
     };
     
     // Обновляем feed.metadata
@@ -171,11 +173,12 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
   
   // Сброс настроек к глобальным
   const resetToGlobal = () => {
-    setSettings({
+    setFeedSettings({
       namePrompt: globalSettings.defaultNamePrompt,
       descriptionPrompt: globalSettings.defaultDescriptionPrompt,
       titlePrompt: globalSettings.defaultTitlePrompt || 'Создай привлекательный заголовок для фида {{товар}}',
       summaryPrompt: globalSettings.defaultSummaryPrompt || 'Создай краткое описание всего фида на основе {{товар}}',
+      systemPrompt: globalSettings.defaultSystemPrompt,
       language: globalSettings.defaultLanguage,
       tone: globalSettings.defaultTone,
       maxTokens: globalSettings.defaultMaxTokens
@@ -195,13 +198,13 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
       // Берем первый товар для примера
       const product = feed.products[0];
       
-      console.log('Генерация примера с настройками:', settings);
-      console.log('Промпт для названия:', settings.namePrompt);
-      console.log('Промпт для описания:', settings.descriptionPrompt);
+      console.log('Генерация примера с настройками:', feedSettings);
+      console.log('Промпт для названия:', feedSettings.namePrompt);
+      console.log('Промпт для описания:', feedSettings.descriptionPrompt);
       
       // Генерируем название и описание
-      const name = await aiService.generateName(product, settings.namePrompt);
-      const description = await aiService.generateDescription(product, settings.descriptionPrompt);
+      const name = await aiService.generateName(product, feedSettings.namePrompt);
+      const description = await aiService.generateDescription(product, feedSettings.descriptionPrompt);
       
       console.log('Результат примера - Название:', name);
       console.log('Результат примера - Описание:', description);
@@ -227,24 +230,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
     setTestResults({});
   };
   
-  // Тестовая генерация для промптов фида
-  const generateFeedExample = async () => {
-    if (!feed.products || feed.products.length === 0) return;
-    
-    try {
-      // Используем данные первых 3 товаров для примера
-      const sampleProducts = feed.products.slice(0, 3);
-      const productsData = sampleProducts.map(p => `Название: ${p.name}, Цена: ${p.price} ${p.currency}, ID: ${p.id}`).join("\n");
-      
-      alert(`Для генерации заголовка и описания фида будут использованы данные первых 3 товаров:\n\n${productsData}\n\nРеальная генерация будет использовать данные всех товаров.`);
-    } catch (error) {
-      console.error('Ошибка при подготовке примера для фида:', error);
-      alert(`Ошибка: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
-    }
-  };
-  
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>      
       {/* --- Блок: Настройки магазина --- */}
       <div className="bg-gray-50 border border-gray-200 overflow-hidden mb-4">
         <div className="px-5 py-3 border-b border-gray-200 bg-gray-100">
@@ -303,12 +290,29 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
           </div>
         </div>
       </div>
-      {/* --- Блок: Настройки AI --- */}
+      
+      {/* --- Блок: Настройки AI для фида --- */}
       <div className="bg-gray-50 border border-gray-200 overflow-hidden mb-4">
         <div className="px-5 py-3 border-b border-gray-200 bg-gray-100">
-          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-700">Настройки AI</h3>
+          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-700">Настройки AI для фида</h3>
         </div>
         <div className="p-5">
+          <div className="mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start">
+              <label htmlFor="ai-system-prompt" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Системный промпт</label>
+              <div className="mt-1 sm:mt-0 sm:w-3/4">
+                <textarea
+                  id="ai-system-prompt"
+                  name="systemPrompt"
+                  value={feedSettings.systemPrompt || ''}
+                  onChange={handleFeedSettingsChange}
+                  rows={2}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                  placeholder="Введите системный промпт для ИИ фида"
+                />
+              </div>
+            </div>
+          </div>
           <div className="mb-4">
             <div className="flex flex-col sm:flex-row sm:items-start">
               <label htmlFor="ai-name-prompt" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Промпт для названий</label>
@@ -316,8 +320,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                 <textarea
                   id="ai-name-prompt"
                   name="namePrompt"
-                  value={settings.namePrompt}
-                  onChange={handleChange}
+                  value={feedSettings.namePrompt}
+                  onChange={handleFeedSettingsChange}
                   rows={2}
                   className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
                   placeholder="Введите промпт с плейсхолдером {{товар}}"
@@ -332,8 +336,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                 <textarea
                   id="ai-description-prompt"
                   name="descriptionPrompt"
-                  value={settings.descriptionPrompt}
-                  onChange={handleChange}
+                  value={feedSettings.descriptionPrompt}
+                  onChange={handleFeedSettingsChange}
                   rows={2}
                   className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
                   placeholder="Введите промпт с плейсхолдером {{товар}}"
@@ -341,6 +345,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
               </div>
             </div>
           </div>
+          
           {/* Кнопки тестирования и сброса */}
           <div className="mb-4 flex gap-2">
             <button
@@ -358,6 +363,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
               Сбросить к глобальным
             </button>
           </div>
+          
           {/* Блок тестирования */}
           {(testResults.generatedName || testResults.generatedDescription || testResults.error || testResults.isLoading) && (
             <div className="mb-4 border rounded-md bg-gray-50 p-4">
@@ -395,7 +401,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
               </div>
             </div>
           )}
-          {/* Общие настройки AI */}
+          
+          {/* Специфичные настройки AI для фида */}
           <div className="mb-4">
             <div className="flex flex-col sm:flex-row sm:items-start">
               <label htmlFor="ai-language" className="block text-sm font-medium text-gray-700 sm:w-1/4 sm:pt-1">Язык</label>
@@ -403,8 +410,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                 <select
                   id="ai-language"
                   name="language"
-                  value={settings.language}
-                  onChange={handleChange}
+                  value={feedSettings.language}
+                  onChange={handleFeedSettingsChange}
                   className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
                 >
                   <option value="ru">Русский</option>
@@ -424,8 +431,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                 <select
                   id="ai-tone"
                   name="tone"
-                  value={settings.tone}
-                  onChange={handleChange}
+                  value={feedSettings.tone}
+                  onChange={handleFeedSettingsChange}
                   className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
                 >
                   <option value="профессиональный">Профессиональный</option>
@@ -445,8 +452,8 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
                   type="number"
                   id="ai-max-tokens"
                   name="maxTokens"
-                  value={settings.maxTokens}
-                  onChange={handleChange}
+                  value={feedSettings.maxTokens}
+                  onChange={handleFeedSettingsChange}
                   min={10}
                   max={4000}
                   className="block w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
@@ -456,6 +463,7 @@ export const FeedAISettingsForm: React.FC<FeedAISettingsProps> = ({ feed, onUpda
           </div>
         </div>
       </div>
+      
       {/* --- Кнопки --- */}
       <div className="flex justify-end gap-3 pt-6">
         {onCancel && (

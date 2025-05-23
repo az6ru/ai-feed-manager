@@ -12,6 +12,11 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
   }
+
+  /* Стили для темной темы */
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium;
@@ -27,13 +32,25 @@
   ::-webkit-scrollbar-track {
     @apply bg-gray-100 rounded-lg;
   }
+
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-gray-800 rounded-lg;
+  }
   
   ::-webkit-scrollbar-thumb {
     @apply bg-gray-300 rounded-lg;
   }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-lg;
+  }
   
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
   }
   
   /* Анимации */
@@ -56,27 +73,51 @@
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
+
+  .dark .focus-ring {
+    @apply focus:ring-blue-400 focus:ring-offset-gray-900;
+  }
   
   /* Стили форм */
   .form-input {
     @apply px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
   }
+
+  .dark .form-input {
+    @apply border-gray-600 bg-gray-800 text-white focus:ring-blue-400 focus:border-blue-400;
+  }
   
   .form-select {
     @apply px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white;
   }
+
+  .dark .form-select {
+    @apply border-gray-600 bg-gray-800 text-white focus:ring-blue-400 focus:border-blue-400;
+  }
   
   .form-checkbox {
     @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+  }
+
+  .dark .form-checkbox {
+    @apply border-gray-600 focus:ring-blue-400;
   }
   
   /* Тени */
   .shadow-card {
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
+
+  .dark .shadow-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.26);
+  }
   
   .shadow-dropdown {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .shadow-dropdown {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.26);
   }
 }
 
@@ -102,6 +143,10 @@ aside {
   display: flex;
   flex-direction: column;
   background-color: white;
+}
+
+.dark aside {
+  background-color: #1f2937; /* bg-gray-800 */
 }
 
 @media (min-width: 1024px) {

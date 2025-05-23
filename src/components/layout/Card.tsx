@@ -4,33 +4,20 @@ interface CardProps {
   title?: string;
   children: ReactNode;
   className?: string;
-  headerClassName?: string;
-  contentClassName?: string;
   footer?: ReactNode;
 }
 
-const Card = ({ 
-  title, 
-  children, 
-  className = "", 
-  headerClassName = "", 
-  contentClassName = "",
-  footer 
-}: CardProps) => {
+const Card: React.FC<CardProps> = ({ title, children, className = '', footer }) => {
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm ${className}`}>
       {title && (
-        <div className={`px-5 py-3 border-b border-gray-200 bg-gray-50 ${headerClassName}`}>
-          <h3 className="text-sm font-medium uppercase tracking-wider text-gray-700">{title}</h3>
+        <div className="border-b border-gray-200 dark:border-gray-700 px-5 py-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
         </div>
       )}
-      
-      <div className={`p-5 ${contentClassName}`}>
-        {children}
-      </div>
-      
+      <div className="px-5 py-5">{children}</div>
       {footer && (
-        <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-4">
           {footer}
         </div>
       )}

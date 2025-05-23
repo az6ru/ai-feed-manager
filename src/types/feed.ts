@@ -75,6 +75,7 @@ export interface FeedAISettings {
   descriptionPrompt?: string;
   titlePrompt?: string;
   summaryPrompt?: string;
+  systemPrompt?: string;
   language?: string;
   tone?: string;
   maxTokens?: number;
@@ -98,6 +99,7 @@ export interface AISettings {
   apiKey: string;
   baseUrl: string;
   model: string;
+  defaultSystemPrompt?: string;
   defaultNamePrompt: string;
   defaultDescriptionPrompt: string;
   defaultTitlePrompt: string;

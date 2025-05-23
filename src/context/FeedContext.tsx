@@ -31,7 +31,7 @@ interface FeedContextProps {
   setCurrentFeed: (id: string | null) => void;
   importFeedFromXml: (xml: string, name: string, sourceUrl?: string) => Promise<Feed>;
   importLargeFeedFromXml: (xml: string, name: string, onProgress?: (processed: number, total: number) => void, sourceUrl?: string) => Promise<Feed>;
-  updateProduct: (feedId: string, productExternalId: string, updates: Partial<Product>) => void;
+  updateProduct: (feedId: string, productIdentifier: string, updates: Partial<Product>) => void;
   updateProducts: (feedId: string, productExternalIds: string[], updates: Partial<Product>) => void;
   deleteProduct: (feedId: string, productId: string) => Promise<void>;
 }
@@ -47,13 +47,23 @@ export function FeedProvider({ children }: { children: ReactNode }) {
 
   // Загрузка фидов из Supabase при инициализации и смене пользователя
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.error('User is not authenticated:', user);
+      return;
+    }
+    
+    console.log('Loading feeds for user:', user.id);
+    
     setIsLoading(true);
     getFeeds(user.id)
       .then((feedsFromDb) => {
+        console.log('Feeds loaded:', feedsFromDb.length);
         setFeeds(feedsFromDb); // только метаданные и счетчики
       })
-      .catch((err) => setError(err.message || 'Ошибка загрузки фидов'))
+      .catch((err) => {
+        console.error('Error loading feeds:', err);
+        setError(err.message || 'Ошибка загрузки фидов');
+      })
       .finally(() => setIsLoading(false));
   }, [user]);
 
@@ -117,6 +127,11 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     // Если уже есть товары и категории — просто ставим
     if (feed.products && feed.categories) {
       setCurrentFeedState(feed);
+      
+      // Сохраняем текущий URL в localStorage
+      const currentPath = window.location.pathname + window.location.search;
+      localStorage.setItem('currentUrl', currentPath);
+      
       return;
     }
     setIsLoading(true);
@@ -127,7 +142,11 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       ]);
       feed = { ...feed, products, categories };
       setFeeds(prev => prev.map(f => f.id === id ? { ...f, products, categories } : f));
-    setCurrentFeedState(feed);
+      setCurrentFeedState(feed);
+      
+      // Сохраняем текущий URL в localStorage
+      const currentPath = window.location.pathname + window.location.search;
+      localStorage.setItem('currentUrl', currentPath);
     } catch (e: any) {
       setError(e.message || 'Ошибка загрузки товаров/категорий');
     } finally {
@@ -136,11 +155,19 @@ export function FeedProvider({ children }: { children: ReactNode }) {
   };
 
   // --- CRUD продуктов ---
-  const updateProduct = async (feedId: string, productExternalId: string, updates: Partial<Product>) => {
+  const updateProduct = async (feedId: string, productIdentifier: string, updates: Partial<Product>) => {
     setIsLoading(true);
     try {
-      // Находим продукт по externalId
-      const product = feeds.find(f => f.id === feedId)?.products.find(p => p.externalId === productExternalId);
+      // Находим продукт по id или externalId
+      const feed = feeds.find(f => f.id === feedId);
+      if (!feed) throw new Error('Feed not found');
+
+      // Сначала ищем по id (UUID), затем по externalId
+      let product = feed.products.find(p => p.id === productIdentifier);
+      if (!product) {
+        product = feed.products.find(p => p.externalId === productIdentifier);
+      }
+      
       if (!product) throw new Error('Product not found');
       
       // Подготавливаем данные для обновления
@@ -157,13 +184,13 @@ export function FeedProvider({ children }: { children: ReactNode }) {
       setFeeds(prev => prev.map(feed =>
         feed.id !== feedId ? feed : {
           ...feed,
-          products: feed.products.map(p => p.externalId === productExternalId ? { ...p, ...updated } : p)
+          products: feed.products.map(p => p.id === product?.id ? { ...p, ...updated } : p)
         }
       ));
       
       if (currentFeed?.id === feedId) setCurrentFeedState(prev => prev ? {
         ...prev,
-        products: prev.products.map(p => p.externalId === productExternalId ? { ...p, ...updates } : p)
+        products: prev.products.map(p => p.id === product?.id ? { ...p, ...updates } : p)
       } : prev);
     } catch (e: any) {
       setError(e.message || 'Ошибка при обновлении товара');

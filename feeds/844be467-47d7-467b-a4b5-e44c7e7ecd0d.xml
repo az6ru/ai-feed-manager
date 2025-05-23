@@ -1,0 +1,1387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yml_catalog date="2025-05-22T11:03:01.113Z">
+  <shop>
+    <name>Lera Treyger</name>
+    <company>first</company>
+    <url>https://leratreyger.ru</url>
+    <categories>
+      <category id="995960968412">All</category>
+      <category id="829741702382">Cерьги</category>
+      <category id="483455984212">Кольца</category>
+      <category id="121526450062">Подвески</category>
+      <category id="783865488962">Браслеты</category>
+      <category id="638107876352">Каффы</category>
+      <category id="125581929222">Чокеры</category>
+      <category id="218708256882">Цепи</category>
+      <category id="286586508962">Броши</category>
+      <category id="464926535112">Гребни и аксессуары</category>
+      <category id="715793544262">Сертификаты</category>
+      <category id="778840655512">Influunt</category>
+      <category id="693739787202">Kaori</category>
+      <category id="533501440462">Kushibi</category>
+      <category id="822851431962">lt x o.rim</category>
+      <category id="815433706702">Ma</category>
+      <category id="924798978672">Satori</category>
+      <category id="199124991452">Ukiyo</category>
+    </categories>
+    <offers>
+      <offer id="8c3526e8-3dc9-4f3b-bdbd-126996df7c46" available="true">
+        <name>ma 2 / emerald</name>
+        <description>
+Лаконичная серьга из 14к золота с изумрудом огранки `груша` 0,18 кар. &lt;br /&gt;Длина серьги 50 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>85000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-562848649972-ma-2-emerald</url>
+        <picture>https://static.tildacdn.com/tild3262-6266-4432-a331-356339346534/2.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="9b1038d5-77ac-467e-8e6e-025002222f6d" available="true">
+        <name>n 3</name>
+        <description>
+Лаконичная серьга из 14к золота. Доступна для заказа в желтом и белом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>30000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-844389707832-n-3</url>
+        <picture>https://static.tildacdn.com/tild6535-3736-4436-b438-363632666262/16.png</picture>
+        <picture>https://static.tildacdn.com/tild3436-6238-4637-b063-356534353462/img_9382_1_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6338-6439-4637-b236-383930663339/16.png</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="ec37a0e6-69da-4781-9243-9843c06302ae" available="true">
+        <name>Earring - серебро</name>
+        <description>
+Серьга из лимитированной коллекции Influunt, посвященной состоянию потока. Серебро 925 пробы, вес 7,5 гр.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;&lt;br /&gt;*Для заказа в золоте 14к выберите материал.
+</description>
+        <price>20000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>778840655512</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-183138322652-earring</url>
+        <picture>https://static.tildacdn.com/tild6362-6433-4962-a435-323332663133/2__2.png</picture>
+        <picture>https://static.tildacdn.com/tild6337-3537-4838-a266-353863346337/IMG_2947_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6339-3161-4634-a165-366137623338/IMG_2946_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3666-3831-4563-b634-363563396231/IMG_2971_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6234-3864-4131-b436-323834353062/IMG_3031_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3930-3832-4264-b235-626162383435/IMG_3015_.jpg</picture>
+        <param name="Коллекция">Influunt</param>
+        <param name="Металл">Серебро</param>
+        <param name="Материал">серебро</param>
+      </offer>
+      <offer id="714be008-12fb-4bef-b47a-a025e5cf1921" available="true">
+        <name>Pendant - серебро</name>
+        <description>
+Подвеска из лимитированной коллекции Influunt, посвященной состоянию потока. &lt;br /&gt;В комплекте - шелковый шнур и хлопковая лента.&lt;br /&gt;Серебро 925 пробы, вес 10 гр. &lt;br /&gt;&lt;br /&gt;*Для заказа в золоте 14к выберите материал.
+</description>
+        <price>25000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>778840655512</categoryId>
+        <url>https://leratreyger.ru/pendants/tproduct/986749691-297225739242-pendant</url>
+        <picture>https://static.tildacdn.com/tild6432-6532-4530-b931-616563643638/1_.png</picture>
+        <picture>https://static.tildacdn.com/tild3930-3135-4437-b562-346431313833/IMG_3027_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3539-3437-4230-b162-363664306264/IMG_2971_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3737-3239-4939-b962-633662663762/IMG_3006.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6535-3434-4633-a538-373363393966/IMG_3023_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3830-3534-4830-b834-396332326662/IMG_2977_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3136-3131-4565-b833-373637393266/IMG_2953_.jpg</picture>
+        <param name="Коллекция">Influunt</param>
+        <param name="Металл">Серебро</param>
+        <param name="Материал">серебро</param>
+      </offer>
+      <offer id="f7ee9ee5-4eaa-48c4-a02e-8bab7a31bf6d" available="true">
+        <name>gift card - 5 000 руб.</name>
+        <description>
+Персонализированный подарочный сертификат для близкого человека. Напишите нам, если вам нужен сертификат на сумму, не указанную на сайте.
+</description>
+        <price>5000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>715793544262</categoryId>
+        <url>https://leratreyger.ru/certificates/tproduct/986801561-687295135002-gift-card</url>
+        <picture>https://static.tildacdn.com/tild3566-3565-4838-b837-303862623335/gift.jpg</picture>
+        <param name="сумма">5 000 руб.</param>
+      </offer>
+      <offer id="c77146d6-2a9e-4467-bd14-8cc3aec0b09d" available="true">
+        <name>Satori hoop</name>
+        <description>
+Лаконичная серьга из 14к золота с лимонным бриллиантом огранки ‘ашер’ 0,23 кар.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>220000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-918443589852-satori-hoop</url>
+        <picture>https://static.tildacdn.com/tild3637-6166-4138-b262-393563356138/1.png</picture>
+        <picture>https://static.tildacdn.com/tild3165-3434-4133-b636-636433356232/R1-02785-035A_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3936-6431-4266-b535-666430396162/DSCF8317_3.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3165-6466-4031-b039-376634653237/photo.jpg</picture>
+        <param name="Коллекция">Satori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="7df235ca-5e02-42e9-a880-4c57bc46c5c5" available="true">
+        <name>Satori stud</name>
+        <description>
+Лаконичная серьга из 14к золота с лимонным бриллиантом огранки ‘ашер’ 0,23 кар.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>155000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>924798978672</categoryId>
+        <url>https://leratreyger.ru/satori/tproduct/985285631-964449793532-satori-stud</url>
+        <picture>https://static.tildacdn.com/tild3734-3131-4562-b736-646130336662/3.png</picture>
+        <picture>https://static.tildacdn.com/tild6531-6566-4963-b062-353639356339/photo.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3431-6333-4363-b032-333131653164/DSCF7936_1_1.jpg</picture>
+        <param name="Коллекция">Satori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="f581acb7-bfaa-4600-a5d9-00c5a310b8e7" available="true">
+        <name>Satori ring</name>
+        <description>
+Лаконичное разомкнутое кольцо из 14к золота с лимонным бриллиантом огранки ‘ашер’ 0,23 кар.
+</description>
+        <price>200000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>924798978672</categoryId>
+        <url>https://leratreyger.ru/satori/tproduct/985285631-791627999762-satori-ring</url>
+        <picture>https://static.tildacdn.com/tild3463-6230-4333-a236-623334643932/2.png</picture>
+        <picture>https://static.tildacdn.com/tild3136-6665-4433-b132-373564383263/photo.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3436-3939-4462-a133-663037643563/DSCF8773.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3730-3334-4461-b935-383039393339/photo.jpg</picture>
+        <param name="Коллекция">Satori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="65ac0976-faba-40fd-9b55-cc5629d1153f" available="true">
+        <name>Satori pendant</name>
+        <description>
+Лаконичная подвеска-чокер из 14к золота с лимонным бриллиантом огранки ‘ашер’ 0,23 кар.&lt;br /&gt;Длина цепочки 40 см.
+</description>
+        <price>195000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>924798978672</categoryId>
+        <url>https://leratreyger.ru/satori/tproduct/985285631-557448899742-satori-pendant</url>
+        <picture>https://static.tildacdn.com/tild3531-6336-4664-b337-663732633462/4.png</picture>
+        <picture>https://static.tildacdn.com/tild3832-3261-4663-b062-633038653231/DSCF8097_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3664-3661-4162-b338-636261373131/photo.jpg</picture>
+        <param name="Коллекция">Satori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="a1689b35-b709-4928-a811-328599b39140" available="true">
+        <name>Ukiyo n 1</name>
+        <description>
+Кольцо из желтого золота 18 карат с желтым бриллиантом огранки &quot;ашер&quot; 2.31 кт. &lt;br /&gt;Ручная работа.
+</description>
+        <price>1550000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-113703392722-ukiyo-n-1</url>
+        <picture>https://static.tildacdn.com/tild3431-3262-4932-b239-366338616161/19_1_gold.png</picture>
+        <picture>https://static.tildacdn.com/tild6164-3337-4662-b130-623866393061/Lera_Treyger-01.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3762-3162-4739-b663-323335333731/Rescan_4.jpeg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="5b26e100-1299-4f4f-9fdf-d36a68c1b872" available="true">
+        <name>Ukiyo n 2</name>
+        <description>
+Кольцо из белого золота 18 карат с розовым бриллиантом огранки &quot;изумруд&quot; 0.83 кт и двумя рядами полупаве 0.21 кт.&lt;br /&gt;Ручная работа.
+</description>
+        <price>680000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>199124991452</categoryId>
+        <url>https://leratreyger.ru/ukiyo/tproduct/986553106-192615653692-ukiyo-n-2</url>
+        <picture>https://static.tildacdn.com/tild3061-6439-4632-a237-356263396637/19_1_pink_diamond_cl.png</picture>
+        <picture>https://static.tildacdn.com/tild3639-3538-4064-a337-323933393235/ukiyo_n_2.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild3235-6434-4530-b938-386339366332/Lera_Treyger_2-2.jpeg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="78efaaa7-fe0d-400a-8375-68652716dbd1" available="true">
+        <name>Ukiyo n 3</name>
+        <description>
+Тонкий теннисный браслет из белого золота с изумрудом огранки &quot;изумруд&quot; 1.8 кт, из желтого золота с паве из бриллиантов.&lt;br /&gt;Ручная работа, золото 18 карат.
+</description>
+        <price>1100000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>783865488962</categoryId>
+        <url>https://leratreyger.ru/bracelets/tproduct/986752026-113588782722-ukiyo-n-3</url>
+        <picture>https://static.tildacdn.com/tild6364-6161-4061-b761-663535383830/tennis.png</picture>
+        <picture>https://static.tildacdn.com/tild3034-3736-4233-a639-373232313037/Rescan_5.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild3363-3466-4537-b939-343736353866/pic2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3837-3432-4437-a236-363561643465/pic.jpeg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="2bdbbe7d-5482-48b4-81d7-f6e6a78797b7" available="true">
+        <name>Ukiyo n 4</name>
+        <description>
+Кольцо из белого золота 18 кт с дорожкой из бриллиантов огранки &quot;принцесса&quot; и коричневым бриллиантом необычной восьмиугольной огранки 2.88 кт.
+</description>
+        <price>2500000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>199124991452</categoryId>
+        <url>https://leratreyger.ru/ukiyo/tproduct/986553106-196843312432-ukiyo-n-4</url>
+        <picture>https://static.tildacdn.com/tild3866-3337-4230-a262-363636643462/19_1_brown.png</picture>
+        <picture>https://static.tildacdn.com/tild6134-6663-4530-b030-316230346363/Rescan_4.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild3837-3831-4764-a166-663738656238/Lera_Treyger-11.jpg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="b8beb04f-74da-4afa-8e5f-9352b8117234" available="true">
+        <name>Ukiyo n 5</name>
+        <description>
+Тонкая серьга из белого золота с розовыми бриллиантами огранки &quot;груша&quot; (≈ 0.1 карата каждый).&lt;br /&gt;Ручная работа, белое золото 18 карат.&lt;br /&gt;Длина изделия - 65 мм.
+</description>
+        <price>350000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>199124991452</categoryId>
+        <url>https://leratreyger.ru/ukiyo/tproduct/986553106-573084397902-ukiyo-n-5</url>
+        <picture>https://static.tildacdn.com/tild3431-6234-4335-b835-633365323935/18_sakura.png</picture>
+        <picture>https://static.tildacdn.com/tild3930-6333-4836-b332-333935393866/Lera_Treyger_2-1.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild3830-3165-4332-b264-353566643363/Rescan_3.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild6665-3039-4135-b433-343431313035/Rescan_2.jpeg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="a8f1532c-7c8b-4c44-a24c-2a0b7adff5e5" available="true">
+        <name>Ukiyo n 6</name>
+        <description>
+Кольцо из белого золота 18 кт с бриллиантом огранки &quot;груша&quot; 0.9 кт и изумрудами 0.2 кт.&lt;br /&gt;Ручная работа, белое золото 18 кт.
+</description>
+        <price>1400000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>199124991452</categoryId>
+        <url>https://leratreyger.ru/ukiyo/tproduct/986553106-412125480872-ukiyo-n-6</url>
+        <picture>https://static.tildacdn.com/tild3231-6365-4634-b031-356135383430/___green_line_to_mak.png</picture>
+        <picture>https://static.tildacdn.com/tild6438-3339-4861-a431-356166656633/Lera_Assets_4x5_logo.jpg</picture>
+        <param name="Коллекция">Ukiyo</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="759ba678-5550-42d3-8038-9ec409dd83d5" available="true">
+        <name>Earth s</name>
+        <description>
+Лаконичная серьга из 14к золота с дорожкой бриллиантов суммой 0,1 кар.&lt;br /&gt;Диаметр серьги 17 мм.#nbsp;Очень красиво смотрится в сочетании с каффом Wind.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>75000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-188688225282-earth-s</url>
+        <picture>https://static.tildacdn.com/tild3666-3866-4031-b266-653335653539/2.png</picture>
+        <picture>https://static.tildacdn.com/tild6336-3065-4461-b539-613234613364/wind_ear_cuff___eart.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6536-6135-4235-a335-386431343262/2023_02_24_ltreyger0.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="92ad5465-8724-4d63-bc3f-2f83735608da" available="true">
+        <name>Earth m</name>
+        <description>
+Лаконичная серьга из 14к золота.&lt;br /&gt;Диаметр серьги 40 мм. Очень красиво смотрится в сочетании с каффом Wind.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-140396294652-earth-m</url>
+        <picture>https://static.tildacdn.com/tild6639-3065-4230-a566-346461336363/4.png</picture>
+        <picture>https://static.tildacdn.com/tild3435-3863-4038-b430-643062333131/earth_earring_m.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6462-6132-4138-a432-623335316636/wind_ear_cuff___eart.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="9aeec22b-1c3c-48d4-a923-8aaab462e552" available="true">
+        <name>Wind</name>
+        <description>
+Лаконичный кафф из 14к золота с дорожкой бриллиантов суммой 0,08 кар.&lt;br /&gt;Диаметр каффа 17 мм, диаметр круга 27 мм.#nbsp;Очень красиво смотрится в сочетании с серьгами Earth s и m.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>100000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-197365485092-wind</url>
+        <picture>https://static.tildacdn.com/tild3230-3262-4561-b162-323763346237/3.png</picture>
+        <picture>https://static.tildacdn.com/tild3234-6632-4031-a262-313362316330/wind_ear_cuff___eart.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3132-6564-4330-a361-326432306665/wind_ear_cuff___eart.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6163-3834-4564-b736-373937626537/2023_02_24_ltreyger0.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="06bf8068-17e8-4d5d-91a7-f358ea72d4b9" available="true">
+        <name>Earth</name>
+        <description>
+Лаконичное кольцо из 14к золота с дорожкой бриллиантов на половину кольца суммой 0,1 кар.
+</description>
+        <price>70000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-641118067692-earth</url>
+        <picture>https://static.tildacdn.com/tild6138-3735-4266-b864-366139326534/12.png</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="1fd07b69-c553-4a31-ad08-cb2d4084336e" available="true">
+        <name>Wind</name>
+        <description>
+Лаконичное кольцо из 14к золота с дорожкой бриллиантов суммой 0,1 кар.&lt;br /&gt;Диаметр среднего круга 27 мм.
+</description>
+        <price>135000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-440403140862-wind</url>
+        <picture>https://static.tildacdn.com/tild6331-3363-4461-b639-346162376433/noroot.png</picture>
+        <picture>https://static.tildacdn.com/tild3066-3165-4564-a135-646134616337/wind_ring.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3532-3934-4939-b865-343530343239/2023_02_24_lweb.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="00605944-91cc-499b-a7c6-33cd57527ee5" available="true">
+        <name>Water</name>
+        <description>
+Лаконичная серьга из 14к золота.&lt;br /&gt;Длина серьги 140 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>35000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-719040234522-water</url>
+        <picture>https://static.tildacdn.com/tild3362-6163-4164-a466-616433323835/11_1.png</picture>
+        <picture>https://static.tildacdn.com/tild6237-3866-4662-a161-396263653733/water_earring.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3463-3233-4231-b230-363637613662/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6232-3536-4637-a331-366138633936/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3737-3264-4266-b530-636462393864/0_.png</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="ceb879bd-b5ed-48a8-a968-772c64bde5a4" available="true">
+        <name>Fire</name>
+        <description>
+Лаконичная серьга из 14к золота на цепочке с кругом из дорожки бриллиантов суммой 0,11 кар.&lt;br /&gt;Длина серьги 120 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>85000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-776646407292-fire</url>
+        <picture>https://static.tildacdn.com/tild3634-3664-4136-a230-643230343465/5_1.png</picture>
+        <picture>https://static.tildacdn.com/tild3237-3261-4262-b162-373263633564/fire_earring.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3664-6636-4665-b530-396334383664/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3064-3830-4862-b462-356362623866/2023_02_24_ltreyger1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3233-6235-4230-a132-643634346639/5.png</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="7555566c-2607-4c07-ab8b-47e34280ae82" available="true">
+        <name>Fire</name>
+        <description>
+Лаконичный кафф из 14к золота с дорожкой бриллиантов суммой 0,09 кар.&lt;br /&gt;Диаметр круга 16 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-145585589892-fire</url>
+        <picture>https://static.tildacdn.com/tild6661-3239-4534-b330-363537663531/1.png</picture>
+        <picture>https://static.tildacdn.com/tild3666-6262-4238-b665-626338613764/fire_ear_cuff.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6335-3862-4035-b136-633533323064/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3533-6562-4665-b861-323764353264/2023_02_24_ltreyger0.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="eb887d39-6202-4fa9-bc44-fe23c93ea0bb" available="true">
+        <name>Void 1</name>
+        <description>
+Лаконичное кольцо из 14к золота с дорожкой бриллиантов суммой 0,11 кар.
+</description>
+        <price>90000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-711297759072-void-1</url>
+        <picture>https://static.tildacdn.com/tild3735-3863-4337-a165-653566376236/6.png</picture>
+        <picture>https://static.tildacdn.com/tild3630-3339-4633-b834-303737613331/void_rings_2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6338-3638-4232-a264-633538356463/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3536-3564-4230-a135-393334393836/void_rings.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="dce28792-bd85-4b93-80b3-bf9614eb8d7b" available="true">
+        <name>Void 3</name>
+        <description>
+Лаконичное кольцо из 14к золота с дорожкой бриллиантов суммой 0,2 кар.
+</description>
+        <price>115000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-359005105822-void-3</url>
+        <picture>https://static.tildacdn.com/tild6436-3438-4138-b037-333837653662/7.png</picture>
+        <picture>https://static.tildacdn.com/tild6665-3762-4138-b638-323830633064/void_ring_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6363-3563-4661-a536-366530383336/void_rings_2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6430-3162-4364-a331-633832306565/void_rings.jpg</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="229dcfe6-f5c1-476f-8bae-4ff591b4256d" available="true">
+        <name>Earth</name>
+        <description>
+Лаконичный чокер из 14к золота с дорожкой бриллиантов в концах суммой 0,08 кар.
+</description>
+        <price>160000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>693739787202</categoryId>
+        <url>https://leratreyger.ru/kaori/tproduct/986636116-716849187952-earth</url>
+        <picture>https://static.tildacdn.com/tild3137-3935-4537-a438-323235356333/9.png</picture>
+        <picture>https://static.tildacdn.com/tild6632-3338-4638-b838-616132386436/earth_choker.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3031-3139-4434-b931-363335323465/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3638-6331-4164-b533-666632356366/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3466-6235-4161-a262-666133333636/2023_02_24_ltreyger0.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3662-3239-4535-b165-303530386237/10.png</picture>
+        <picture>https://static.tildacdn.com/tild3463-3262-4832-b066-613062313434/9_wh.png</picture>
+        <param name="Коллекция">Kaori</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="cb041f7d-6727-47c2-b159-87022570c216" available="true">
+        <name>ma 1</name>
+        <description>
+Лаконичная серьга из 14к золота с бриллиантом огранки `груша` 0,15 кар.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>90000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-173521446212-ma-1</url>
+        <picture>https://static.tildacdn.com/tild6163-6333-4263-b035-313637626264/IMG_4634_.png</picture>
+        <picture>https://static.tildacdn.com/tild3736-3262-4832-b162-656134636162/leratreyger_film_5.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3039-6430-4364-b931-346537343837/IMG_4634_.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="fddb07b9-d1b9-4345-b9bf-3f1a1de86c4c" available="true">
+        <name>ma 2</name>
+        <description>
+Лаконичная серьга из 14к золота с бриллиантом огранки `груша` 0,15 кар. &lt;br /&gt;Длина серьги 50 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>115000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-905714578532-ma-2</url>
+        <picture>https://static.tildacdn.com/tild6432-3035-4333-b766-303137333062/IMG_4637.png</picture>
+        <picture>https://static.tildacdn.com/tild6132-6433-4139-a165-386432363539/leratreyger_film_11.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3363-3164-4439-b030-393036653364/IMG_4637-2.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="4586809b-6b20-452d-84e9-70e74270ff47" available="true">
+        <name>ma 9</name>
+        <description>
+Лаконичная подвеска-галстук из 14к золота с бриллиантом огранки `груша` 0,15 кар.&lt;br /&gt;Длина подвески регулируется за счет золотого шарика. &lt;br /&gt;Длина цепи 70 см.
+</description>
+        <price>180000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-343419509782-ma-9</url>
+        <picture>https://static.tildacdn.com/tild3265-3235-4135-a338-343666383237/9.png</picture>
+        <picture>https://static.tildacdn.com/tild3561-3364-4665-a566-616663363337/IMG_7505.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3136-3561-4663-b664-663335613433/9-3.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="c8972dd5-1da0-47cc-93ee-b4bf3c0c21c5" available="true">
+        <name>ma 3</name>
+        <description>
+Лаконичная серьга из 14к золота с бриллиантом огранки `груша` 0,15 кар.&lt;br /&gt;Длина серьги 110 мм.&lt;br /&gt;Указана стоимость одного изделия.#nbsp;
+</description>
+        <price>150000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-176962278832-ma-3</url>
+        <picture>https://static.tildacdn.com/tild6336-6435-4434-b838-306463653165/65.png</picture>
+        <picture>https://static.tildacdn.com/tild6535-3730-4331-b534-626537653536/leratreyger_film_9.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6665-3732-4466-b662-343436303532/8_4copy.png</picture>
+        <picture>https://static.tildacdn.com/tild3736-6163-4938-b439-356330363263/leratreyger_film_2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6662-6165-4363-a139-323465336632/65.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="f4144fdb-ef37-487e-99c9-4c4f2132813a" available="true">
+        <name>ma 4</name>
+        <description>
+Лаконичная серьга из 14к золота с 2 бриллиантами огранки `груша` 0,15 кар каждый.&lt;br /&gt;Длина серьги 250 мм.&lt;br /&gt;Указана стоимость одного изделия.#nbsp;
+</description>
+        <price>220000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-844340398792-ma-4</url>
+        <picture>https://static.tildacdn.com/tild6565-3966-4335-a365-633561343436/IMG_4639_.png</picture>
+        <picture>https://static.tildacdn.com/tild3931-6437-4364-b136-333037663065/leratreyger_film_7.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3635-3263-4636-a236-336630613165/IMG_4639_2.png</picture>
+        <picture>https://static.tildacdn.com/tild3335-6563-4263-b939-643762333666/leratreyger_film_24.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6434-6432-4530-b537-336663613739/IMG_4639_.png</picture>
+        <picture>https://static.tildacdn.com/tild6463-3032-4265-b637-653466646165/leratreyger_film_7_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6132-3666-4634-a230-333435313432/leratreyger_film_4.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3031-6162-4633-b437-376637653437/leratreyger_film_10.jpg</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="5272fc65-a87c-41d3-bb02-fa07a90e522a" available="true">
+        <name>ma 5</name>
+        <description>
+Лаконичная серьга из 14к золота с бриллиантом огранки `маркиз` 0,15 кар.&lt;br /&gt;Диаметр серьги 45 мм.&lt;br /&gt;Указана стоимость одного изделия.#nbsp;
+</description>
+        <price>120000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-639440665742-ma-5</url>
+        <picture>https://static.tildacdn.com/tild6633-3337-4536-b738-653966393931/IMG_4640.png</picture>
+        <picture>https://static.tildacdn.com/tild3137-6635-4332-a136-346263303632/leratreyger_film_18.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3735-6164-4231-b836-643362643633/IMG_4640-2.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="4984b5aa-05e3-4782-80e5-820e87cbb8b7" available="true">
+        <name>ma 6</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантом огранки `маркиз` 0,15 кар.&lt;br /&gt;Указана стоимость одного изделия.#nbsp;
+</description>
+        <price>150000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-107181437542-ma-6</url>
+        <picture>https://static.tildacdn.com/tild3433-6562-4737-a262-333433366332/IMG_46442__copy.png</picture>
+        <picture>https://static.tildacdn.com/tild6239-3064-4866-b437-363831363763/leratreyger_film_20_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6561-3962-4563-b736-373739313563/IMG_46442__copy.png</picture>
+        <picture>https://static.tildacdn.com/tild6161-3936-4337-a138-343534646635/leratreyger_film_13.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6265-3033-4434-a161-363763366331/leratreyger_film_21.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3933-3137-4162-b561-303161346632/leratreyger_film_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6332-3630-4232-b262-333632663563/leratreyger_film_20.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3437-3062-4833-b132-636433363730/leratreyger_film_8.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3064-6433-4362-b566-393733373636/leratreyger_film_6.jpg</picture>
+        <param name="Сollection">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="e438330a-8376-4b11-a84e-96352c2d437b" available="true">
+        <name>ma 7</name>
+        <description>
+Лаконичное кольцо из 14к золота с 2 бриллиантами огранки `груша` 0,15 кар каждый.&lt;br /&gt;Указана стоимость одного изделия.#nbsp;
+</description>
+        <price>200000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-265187798812-ma-7</url>
+        <picture>https://static.tildacdn.com/tild6234-6539-4865-b864-313134613231/IMG_4642__copy.png</picture>
+        <picture>https://static.tildacdn.com/tild3563-3231-4738-b862-393736343938/leratreyger_film_22.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3564-3335-4366-a365-306334623237/IMG_4642__copy.png</picture>
+        <picture>https://static.tildacdn.com/tild3932-6630-4533-a537-613136633938/leratreyger_film_5.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3839-6438-4433-a166-613432353735/leratreyger_film_23_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3863-6161-4563-a336-346536656431/leratreyger_film_7_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3639-3338-4637-b734-623833656662/leratreyger_film_23.jpg</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="ad960644-e8c0-4d5b-bdde-25af24934979" available="true">
+        <name>ma 8</name>
+        <description>
+Лаконичный браслет из 14к золота с 3 бриллиантами огранки `груша` 0,15 кар каждый.&lt;br /&gt;Каждое изделие изготавливается индивидуально по размеру вашего запястья.#nbsp;
+</description>
+        <price>300000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-297893955712-ma-8</url>
+        <picture>https://static.tildacdn.com/tild3866-6433-4232-b531-336463626536/IMG_4636.png</picture>
+        <picture>https://static.tildacdn.com/tild6438-3465-4731-b439-623035356136/leratreyger_film_17.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3331-6236-4162-a237-393737623865/IMG_4636-2.png</picture>
+        <picture>https://static.tildacdn.com/tild6164-6566-4632-b836-336135393234/leratreyger_film_12.jpg</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="b5f4cc57-269f-48a1-9bd0-bb740616d419" available="true">
+        <name>ma 1 / emerald</name>
+        <description>
+Лаконичная серьга из 14к золота с изумрудом огранки `груша` 0,18 кар.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-807613389142-ma-1-emerald</url>
+        <picture>https://static.tildacdn.com/tild3535-3462-4330-a336-613037633338/1.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="e420fadb-abcf-4e79-9a8c-3b4419418267" available="true">
+        <name>ma 3 / emerald</name>
+        <description>
+Лаконичная серьга из 14к золота с изумрудом огранки `груша` 0,18 кар.&lt;br /&gt;Длина серьги 110 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>110000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-226582340092-ma-3-emerald</url>
+        <picture>https://static.tildacdn.com/tild6661-3336-4738-a334-383435643964/3.png</picture>
+        <picture>https://static.tildacdn.com/tild6433-6432-4831-b537-666366346238/3_1.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="8d63d457-e07f-4724-9b3b-83ea9cd0e4ef" available="true">
+        <name>ma 4 / emerald</name>
+        <description>
+Лаконичная серьга из 14к золота с 2 изумрудами огранки `груша` 0,18 кар. каждый.&lt;br /&gt;Длина серьги 250 мм.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>145000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-728820891522-ma-4-emerald</url>
+        <picture>https://static.tildacdn.com/tild3634-6562-4039-b165-393062633137/4.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="ea802931-1e4b-42e1-a3a1-ef88ee9f5a0c" available="true">
+        <name>ma 7 / emerald</name>
+        <description>
+Лаконичное кольцо из 14к золота с 2 изумрудами огранки `груша` 0,18 кар. каждый.&lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>130000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-460402424202-ma-7-emerald</url>
+        <picture>https://static.tildacdn.com/tild6639-3535-4433-a439-656635366135/7_1.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="3bdbb348-f8c7-4683-891c-872a2504b58f" available="true">
+        <name>ma 8 / emerald</name>
+        <description>
+Лаконичный браслет из 14к золота с 3 изумрудами огранки `груша` 0,18 кар. каждый.&lt;br /&gt;Каждое изделие изготавливается индивидуально по размеру вашего запястья.
+</description>
+        <price>185000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-633573394732-ma-8-emerald</url>
+        <picture>https://static.tildacdn.com/tild6136-3434-4333-b637-363037373838/8_1.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="71e7286e-4585-4116-a681-dd66d42c8ed9" available="true">
+        <name>ma 9 / emerald</name>
+        <description>
+Лаконичная подвеска-галстук из 14к золота с изумрудом огранки `груша` 0,18 кар.&lt;br /&gt;Длина подвески регулируется за счет золотого шарика. &lt;br /&gt;Длина цепи 70 см.
+</description>
+        <price>120000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>815433706702</categoryId>
+        <url>https://leratreyger.ru/ma/tproduct/986669756-490176289632-ma-9-emerald</url>
+        <picture>https://static.tildacdn.com/tild3664-6635-4764-a336-663262393164/9_1.png</picture>
+        <param name="Коллекция">Ma</param>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Изумруды</param>
+      </offer>
+      <offer id="1570b66a-fc01-4b1d-94b0-2fd353374e68" available="true">
+        <name>n 1</name>
+        <description>
+Лаконичная серьга из 14к золота с речным жемчугом.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>45000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-520518078152-n-1</url>
+        <picture>https://static.tildacdn.com/tild3165-3133-4165-b865-323063383062/1.png</picture>
+        <picture>https://static.tildacdn.com/tild3234-3936-4136-b236-393065626338/2019_12_09_3709_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6266-3334-4261-b064-363661313039/1.png</picture>
+        <picture>https://static.tildacdn.com/tild3134-3638-4265-b862-373533306334/61982580-50E5-48A1-9.jpeg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="d8de26c6-214c-4023-9ff9-eec9a9be3d64" available="true">
+        <name>n 4</name>
+        <description>
+Деликатное кольцо из 14к золота и речного жемчуга.
+</description>
+        <price>50000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-160298228252-n-4</url>
+        <picture>https://static.tildacdn.com/tild6331-3066-4433-a633-333463356234/3.png</picture>
+        <picture>https://static.tildacdn.com/tild6438-3734-4932-b662-313739306664/Leratreyger_may20_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3038-3639-4362-b562-653539656461/3.png</picture>
+        <picture>https://static.tildacdn.com/tild3364-3865-4332-a431-396130663635/2019_12_09_3662_copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6231-3234-4631-b333-393562623031/IMG_1046_2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6664-3163-4636-b464-613536316532/2019_12_09_3646_copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3939-6238-4337-a136-646665306636/img_9692_.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="ede05e77-defc-4b33-837a-bd01f7f42226" available="true">
+        <name>n 8</name>
+        <description>
+Нежный пуссет из золота 14к круглого сечения с речным жемчугом.
+</description>
+        <price>18000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-732060102192-n-8</url>
+        <picture>https://static.tildacdn.com/tild3232-3665-4165-a563-343962353164/7.png</picture>
+        <picture>https://static.tildacdn.com/tild3839-3563-4137-b136-626638653232/2019_12_09_3508_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3834-3565-4261-a561-663764393436/7-2.png</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="8f89b1d0-a7a9-4798-9b52-44c69ebb94a2" available="true">
+        <name>n 2</name>
+        <description>
+Лаконичная серьга из 14к золота. Доступна для заказа в желтом и белом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>30000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-143582708612-n-2</url>
+        <picture>https://static.tildacdn.com/tild6131-3064-4761-b530-646437633839/2.png</picture>
+        <picture>https://static.tildacdn.com/tild3234-6462-4466-b233-373931363439/2019_12_09_3727_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6634-3666-4237-a561-623635353536/2.png</picture>
+        <picture>https://static.tildacdn.com/tild3635-3832-4430-b932-356437656361/IMG_9043.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6638-3663-4635-a432-303565633436/noroot.png</picture>
+        <picture>https://static.tildacdn.com/tild3735-6238-4638-a563-396334656463/IMG_7958_1.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="da218f5b-b3dd-4f6e-8dc9-0a9b0d09f682" available="true">
+        <name>n 12</name>
+        <description>
+Лаконичная серьга из 14к золота. Диаметр сережки 25 мм. Доступна для заказа в желтом и белом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>70000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-873849632512-n-12</url>
+        <picture>https://static.tildacdn.com/tild6235-6564-4361-b231-366232646263/11.png</picture>
+        <picture>https://static.tildacdn.com/tild3632-3066-4839-a639-303866613264/img_9373_1_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3963-3462-4033-b162-326237653535/11.png</picture>
+        <picture>https://static.tildacdn.com/tild3735-3161-4138-b463-306266313132/Leratreyger_may20_2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6463-3730-4535-a137-356239316530/IMG_9645_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6231-6461-4330-a131-616433646638/IMG_1697_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3634-3765-4333-b562-633032643561/IMG_1221_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6232-3638-4964-a633-346166653664/IMG_0258_.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="4f7e0c79-902c-4bd2-84b7-40126998dd16" available="true">
+        <name>n 7</name>
+        <description>
+Нежный кафф из 14к золота круглого сечения с речным жемчугом.
+</description>
+        <price>20000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>638107876352</categoryId>
+        <url>https://leratreyger.ru/cuffs/tproduct/986753266-711454573432-n-7</url>
+        <picture>https://static.tildacdn.com/tild3563-6430-4162-a137-373131343534/6.png</picture>
+        <picture>https://static.tildacdn.com/tild3865-3364-4835-b834-633563363536/2019_12_09_98_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3861-3361-4966-b964-636465393234/6-2.png</picture>
+        <picture>https://static.tildacdn.com/tild3236-6633-4666-a566-336436663931/img_9692_.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="58cf7b1d-0fa0-4c5a-a0dd-77dfe26fe43f" available="true">
+        <name>n 10</name>
+        <description>
+Нежная серьга из золота 14к с 3 речными жемчужинами идеально круглой формы. Диаметр сережки 10 мм.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>35000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-468344392542-n-10</url>
+        <picture>https://static.tildacdn.com/tild6465-6633-4434-b234-316461613731/9.png</picture>
+        <picture>https://static.tildacdn.com/tild6562-6265-4463-b637-303265353137/2019_12_09_3422.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3635-3834-4534-b939-393734323931/9-4.png</picture>
+        <picture>https://static.tildacdn.com/tild6337-6633-4034-a631-363733363232/2019_12_09_3416.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="462f11be-e894-49f8-af20-c9828d61917e" available="true">
+        <name>n 18</name>
+        <description>
+Лаконичное кольцо из 5 речных жемчужин круглой формы и желтого 14к золота. &lt;br /&gt;Дизайн кольца отсылает к жемчужным украшениям Анны Павловой. &lt;br /&gt;
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-191671697892-n-18</url>
+        <picture>https://static.tildacdn.com/tild3766-6166-4630-b437-383361393837/33.png</picture>
+        <picture>https://static.tildacdn.com/tild6239-3832-4932-a630-366235363033/Leratreyger_may20_16.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6635-3330-4564-a335-366632633538/33.png</picture>
+        <picture>https://static.tildacdn.com/tild3763-6462-4961-b333-353466356463/Leratreyger_may20_34.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3035-3031-4664-b862-653162316331/Leratreyger_may20_26.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="966cdb39-a276-4df3-aa32-e03e04c98ba3" available="true">
+        <name>n 9</name>
+        <description>
+Нежная серьга из золота 14к с речным жемчугом. Длина изделия 10 см. В качестве пары можно подобрать жемчужный пуссет.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>35000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-113562641212-n-9</url>
+        <picture>https://static.tildacdn.com/tild6137-6238-4135-b536-393861373133/8.png</picture>
+        <picture>https://static.tildacdn.com/tild3338-3736-4261-b463-346364613263/IMG_2207.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3836-3235-4631-a366-633866383861/8-2.png</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="09c485ff-fd88-4ca3-94d7-405c33828791" available="true">
+        <name>n 26</name>
+        <description>
+Лаконичный браслет из 14к золота с речным жемчугом.&lt;br /&gt;
+</description>
+        <price>180000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>783865488962</categoryId>
+        <url>https://leratreyger.ru/bracelets/tproduct/986752026-634917509542-n-26</url>
+        <picture>https://static.tildacdn.com/tild3438-3465-4963-b032-633837396635/26_1.png</picture>
+        <picture>https://static.tildacdn.com/tild3830-3834-4438-b936-393264313735/IMG_5142_2_copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6532-3732-4135-b035-323931303738/26_1.png</picture>
+        <picture>https://static.tildacdn.com/tild3866-6461-4261-a666-633162663839/bracelet.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6665-3463-4332-a535-323532356537/bracelet2.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="43d07abf-dc66-4c16-a2a4-92c2e6a47f85" available="true">
+        <name>n 28</name>
+        <description>
+Нежное кольцо из золота 14к с речным жемчугом. &lt;br /&gt;
+</description>
+        <price>95000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-402621095392-n-28</url>
+        <picture>https://static.tildacdn.com/tild6432-3931-4437-a633-373232373539/6_2.png</picture>
+        <picture>https://static.tildacdn.com/tild3265-6364-4439-b965-636464373036/IMG_2756.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6431-3065-4565-a330-653539363039/6_2.png</picture>
+        <picture>https://static.tildacdn.com/tild3038-6662-4039-a630-663738636435/IMG_2737.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3933-6462-4464-b532-396366366261/26FCD7FD-8239-4FE1-A.jpeg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="cfeae713-8fad-417a-b0bf-bff4f2eb313f" available="true">
+        <name>n 14</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантами. &lt;br /&gt;Доступно для заказа в желтом и белом золоте.
+</description>
+        <price>160000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-222556990152-n-14</url>
+        <picture>https://static.tildacdn.com/tild3661-3832-4761-a361-626666346231/7_.png</picture>
+        <picture>https://static.tildacdn.com/tild6463-6364-4832-a465-646462623062/IMG_6AE13FC3A693-1.jpeg</picture>
+        <picture>https://static.tildacdn.com/tild3965-3035-4437-a130-353138633438/7_-2.png</picture>
+        <picture>https://static.tildacdn.com/tild3634-6336-4538-b235-326464656363/IMG_7951_1.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3766-3735-4266-a337-646239316234/64B6BE78-B082-40CB-B.jpeg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="8307ccae-54cb-4d4b-85a1-ce02a3359405" available="true">
+        <name>n 17</name>
+        <description>
+Лаконичное кольцо из 2 вращающихся колец из белого и желтого 14к золота. &lt;br /&gt;Дизайн кольца отсылает к пространственным композициям Александра Родченко и геометричным рисункам его жены Варвары Степановой. &lt;br /&gt;
+</description>
+        <price>100000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-443958871892-n-17</url>
+        <picture>https://static.tildacdn.com/tild6536-3638-4136-b362-633261353966/2.png</picture>
+        <picture>https://static.tildacdn.com/tild6336-6330-4565-a634-333834663239/Leratreyger_may20_4.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6463-3434-4339-b732-303835623032/IMG_9463.JPG</picture>
+        <picture>https://static.tildacdn.com/tild3332-3630-4765-a432-663731356232/Leratreyger_may20_7.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6632-3536-4636-b934-613831663162/2-2.png</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="23c2fc21-ce60-4bb9-af27-696d127e30e8" available="true">
+        <name>n 27</name>
+        <description>
+Лаконичный браслет из 14к золота. Представлен в размере `м`.#nbsp;
+</description>
+        <price>200000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>783865488962</categoryId>
+        <url>https://leratreyger.ru/bracelets/tproduct/986752026-670394133202-n-27</url>
+        <picture>https://static.tildacdn.com/tild3935-6465-4939-a134-663963383931/28_copy2.png</picture>
+        <picture>https://static.tildacdn.com/tild3933-6435-4563-b365-303838373861/noroot.png</picture>
+        <picture>https://static.tildacdn.com/tild6236-3038-4364-b535-386136313363/891B1257-B4D9-40C8-A.JPG</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="dc4fc6fa-96b6-435f-bdec-b2567f26463c" available="true">
+        <name>n 20</name>
+        <description>
+Нежный кафф из золота 14к с речным жемчугом. &lt;br /&gt;Доступен для заказа в белом или желтом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>638107876352</categoryId>
+        <url>https://leratreyger.ru/cuffs/tproduct/986753266-213392534642-n-20</url>
+        <picture>https://static.tildacdn.com/tild3238-3063-4333-b566-653032303938/36.png</picture>
+        <picture>https://static.tildacdn.com/tild3539-6265-4530-b335-383533316632/Leratreyger_may20_9.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6432-6265-4764-b664-306133383739/Leratreyger_may20_17.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Жемчуг</param>
+      </offer>
+      <offer id="c9b3d345-e877-4afb-865d-47ae588922f2" available="true">
+        <name>n 19</name>
+        <description>
+Нежная тройная серьга из золота 14к. &lt;br /&gt;Доступна для заказа в белом или желтом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;&lt;br /&gt;
+</description>
+        <price>42000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-182304866472-n-19</url>
+        <picture>https://static.tildacdn.com/tild3235-6264-4332-b866-326235383933/35.png</picture>
+        <picture>https://static.tildacdn.com/tild3862-3962-4562-b365-333438636237/Leratreyger_may20_24.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3565-6138-4531-a430-346261623930/Leratreyger_may20_11.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="c7344517-2602-40ee-bdcc-f804d73cf88d" available="true">
+        <name>n 21</name>
+        <description>
+Нежная серьга из золота 14к. &lt;br /&gt;Длина цепочки 35 см. &lt;br /&gt;Доступна для заказа в белом или желтом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>55000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-553322198062-n-21</url>
+        <picture>https://static.tildacdn.com/tild3263-6339-4037-b735-633435393034/37.png</picture>
+        <picture>https://static.tildacdn.com/tild6565-6238-4130-a361-666134623261/76.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3131-3264-4632-b233-643436666633/2020_06_11_7327_.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="edac33c0-91be-4e8d-9158-de63d3d72ebe" available="true">
+        <name>n 16</name>
+        <description>
+Нежная серьга из золота 14к. &lt;br /&gt;Длина цепочки 13 см. &lt;br /&gt;Доступна для заказа в белом или желтом золоте.&lt;br /&gt;Указана стоимость одного изделия.&lt;br /&gt;
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-601698112372-n-16</url>
+        <picture>https://static.tildacdn.com/tild3237-6361-4765-b635-666434393632/23.png</picture>
+        <picture>https://static.tildacdn.com/tild6239-3831-4338-a261-346631366531/IMG_1025_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6362-6237-4336-b432-363564643633/25.png</picture>
+        <picture>https://static.tildacdn.com/tild6561-3663-4836-b838-336138343934/Leratreyger_may20_41.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3030-3635-4131-a666-323530363430/IMG_1722_1_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3637-3863-4531-b939-623863633439/IMG_1029_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6630-3765-4262-a362-363930646463/Leratreyger_may20_5.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="9b9467c2-8170-468e-bca1-002d7e0b204a" available="true">
+        <name>n 23</name>
+        <description>
+Лаконичное кольцо из 14к золота. &lt;br /&gt;Доступно для заказа в желтом и белом золоте.
+</description>
+        <price>80000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-703909662112-n-23</url>
+        <picture>https://static.tildacdn.com/tild6165-3061-4965-b332-313138343831/_.png</picture>
+        <picture>https://static.tildacdn.com/tild3931-6562-4163-b132-643534313434/IMG_5291.JPG</picture>
+        <picture>https://static.tildacdn.com/tild6236-3739-4263-b138-356438666230/__.png</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="8825cfc1-4636-4846-9703-14cb398087ab" available="true">
+        <name>n 24</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантом огранки `багет`.&lt;br /&gt;Доступно для заказа в желтом и белом золоте.#nbsp;
+</description>
+        <price>170000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-465309342142-n-24</url>
+        <picture>https://static.tildacdn.com/tild3738-3131-4365-b334-613266326434/__.png</picture>
+        <picture>https://static.tildacdn.com/tild3930-3866-4235-a234-383162333533/5_copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6237-3135-4765-a566-386361343035/___.png</picture>
+        <picture>https://static.tildacdn.com/tild3539-3362-4936-b837-646131633130/96B122C5-24B8-4785-B.jpeg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="6d4dde72-da20-4635-8d7a-71c3579ba784" available="true">
+        <name>n 29</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантом круглой огранки диаметром 3,8 мм (0,2 карат).&lt;br /&gt;Доступно для заказа в розовом, желтом и белом золоте.
+</description>
+        <price>200000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-745327468162-n-29</url>
+        <picture>https://static.tildacdn.com/tild6233-3033-4336-b735-623661373434/__.png</picture>
+        <picture>https://static.tildacdn.com/tild3261-6434-4265-b231-366634313762/IMG_4774_copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3731-3862-4136-b663-663737656535/___.png</picture>
+        <picture>https://static.tildacdn.com/tild3865-6339-4961-a432-366237613937/770E12DB-830F-41B3-9.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="12f575e8-2ad6-4016-9cba-243d4fe473ab" available="true">
+        <name>n 25</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантами огранки `багет`.&lt;br /&gt;Доступно для заказа в желтом и белом золоте.
+</description>
+        <price>250000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-109682905452-n-25</url>
+        <picture>https://static.tildacdn.com/tild3538-3061-4766-b730-353239323866/____.png</picture>
+        <picture>https://static.tildacdn.com/tild6166-6138-4032-a636-646262633565/____.png</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="f88424ea-dd0a-45f2-89aa-a0fe82986323" available="true">
+        <name>n 15</name>
+        <description>
+Лаконичное кольцо из 14к золота с бриллиантами различной огранки. Дизайн кольца символизирует связь между нами с мамой, изготавливается по индивидуальному заказу. &lt;br /&gt;Мы подберем специально для вас цвет и огранку камней, чтобы сделать изделие максимально личным. &lt;br /&gt;Доступно для заказа в желтом и белом золоте.
+</description>
+        <price>180000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-282102572382-n-15</url>
+        <picture>https://static.tildacdn.com/tild6564-3136-4461-a231-356130303035/mom_me.png</picture>
+        <picture>https://static.tildacdn.com/stor6332-3166-4264-b731-643962373162/82745276.jpg</picture>
+        <picture>https://static.tildacdn.com/stor3762-6434-4161-a638-363066623361/76502760.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6439-3834-4466-b635-663131383636/mom_me_.png</picture>
+        <picture>https://static.tildacdn.com/tild3836-6334-4665-b361-383237623935/IMG_4830_copy_copy_c.jpg</picture>
+        <param name="Металл">Золото</param>
+        <param name="Вставка">Бриллианты</param>
+      </offer>
+      <offer id="8e6bd45b-dadd-485f-8085-15ef9c997625" available="true">
+        <name>n 5</name>
+        <description>
+Деликатное кольцо из 14к золота круглого сечения.
+</description>
+        <price>13000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-798532864932-n-5</url>
+        <picture>https://static.tildacdn.com/tild3766-3766-4164-b035-376463333030/4.png</picture>
+        <picture>https://static.tildacdn.com/tild3337-3966-4663-b666-386339623936/2019_12_09_3772_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6263-3534-4234-a162-363339613065/2019_12_09_3447.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="fb200480-a8af-46f0-9cef-c05354f6121b" available="true">
+        <name>n 6</name>
+        <description>
+Деликатное кольцо из цепочки, 14к золото.
+</description>
+        <price>13000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-515252634512-n-6</url>
+        <picture>https://static.tildacdn.com/tild3638-3532-4365-b331-393037366162/5.png</picture>
+        <picture>https://static.tildacdn.com/tild3933-6332-4131-b861-636363626134/noroot.png</picture>
+        <picture>https://static.tildacdn.com/tild3532-3662-4730-b834-616230306439/5.png</picture>
+        <picture>https://static.tildacdn.com/tild6430-3437-4561-a161-643837636236/IMG_9462.JPG</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="7181564b-7c8c-437f-8298-b90816ba016d" available="true">
+        <name>n 11</name>
+        <description>
+Деликатная самодостаточная цепочка из 14к золота. Длина 45 см.
+</description>
+        <price>60000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>218708256882</categoryId>
+        <url>https://leratreyger.ru/chains/tproduct/986756846-251380119002-n-11</url>
+        <picture>https://static.tildacdn.com/tild3038-6334-4831-b836-353431643734/10.png</picture>
+        <picture>https://static.tildacdn.com/tild3736-6538-4264-a135-316336373961/2019_12_09_3482.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3662-6430-4064-a530-333837313331/10-2.png</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="886f9524-09d3-444c-adf5-9f1dace70658" available="true">
+        <name>n 13</name>
+        <description>
+Лаконичный кафф из 14к золота. Диаметр изделия 16 мм. Доступно для заказа в желтом и белом золоте.
+</description>
+        <price>35000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>638107876352</categoryId>
+        <url>https://leratreyger.ru/cuffs/tproduct/986753266-523275624492-n-13</url>
+        <picture>https://static.tildacdn.com/tild3533-3031-4130-b833-616533623830/12.png</picture>
+        <picture>https://static.tildacdn.com/tild6638-3035-4636-b163-346563363563/img_9665__copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3266-6339-4635-a334-353939343138/12.png</picture>
+        <picture>https://static.tildacdn.com/tild6565-6634-4464-b865-633564386164/IMG_1071.JPG</picture>
+        <picture>https://static.tildacdn.com/tild6133-3434-4735-b636-393065303430/IMG_9645_.jpg</picture>
+        <param name="Металл">Золото</param>
+      </offer>
+      <offer id="376a60e9-2e8b-4840-8b6d-4b3d79f214cc" available="true">
+        <name>Brooch - серебро</name>
+        <description>
+Брошь из коллекции Influunt, посвященной состоянию потока. Серебро 925 пробы.
+</description>
+        <price>25000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>778840655512</categoryId>
+        <url>https://leratreyger.ru/brooches/tproduct/986758386-668987052922-brooch</url>
+        <picture>https://static.tildacdn.com/tild3463-3265-4966-a662-363739356530/2__2-1_.png</picture>
+        <picture>https://static.tildacdn.com/tild6535-3362-4361-b132-633038646463/IMG_6403_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6461-3363-4539-b961-393735336265/DSCF1892_3_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6630-3162-4239-a134-313133613034/DSCF1859_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3033-3234-4563-b065-616363363163/IMG_6398_2.jpg</picture>
+        <param name="Коллекция">Influunt</param>
+        <param name="Металл">Серебро</param>
+        <param name="Материал">серебро</param>
+      </offer>
+      <offer id="3e95cc1f-7c8f-406d-9901-ffc2aad95bcc" available="true">
+        <name>n 17 / silver edition</name>
+        <description>
+Лаконичное кольцо из 2 вращающихся колец из серебра 925 пробы, покрытое родием. &lt;br /&gt;Дизайн кольца отсылает к пространственным композициям Александра Родченко и геометричным рисункам его жены Варвары Степановой.
+</description>
+        <price>18000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-398353863672-n-17-silver-edition</url>
+        <picture>https://static.tildacdn.com/tild6538-3032-4232-a635-623533336564/-5.png</picture>
+        <picture>https://static.tildacdn.com/tild6364-6264-4334-b830-653061313038/_Leratreyger_may20_4.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6637-6566-4730-b135-383432656330/Leratreyger_may20_7.jpg</picture>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="d5ecb201-abe8-4a89-a865-795055740c79" available="true">
+        <name>n 27 / silver edition</name>
+        <description>
+Лаконичный браслет из серебра 925 пробы, покрытый родием.
+</description>
+        <price>30000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>783865488962</categoryId>
+        <url>https://leratreyger.ru/bracelets/tproduct/986752026-710181251682-n-27-silver-edition</url>
+        <picture>https://static.tildacdn.com/tild6237-6231-4165-b237-646235356261/-.png</picture>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="48765d03-e294-4935-972f-d21ded4ae418" available="true">
+        <name>n 23 / silver edition</name>
+        <description>
+Лаконичное кольцо из серебра 925 пробы, покрытое родием.
+</description>
+        <price>10000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>483455984212</categoryId>
+        <url>https://leratreyger.ru/rings/tproduct/986747816-789098272092-n-23-silver-edition</url>
+        <picture>https://static.tildacdn.com/tild3462-6536-4532-a239-626265646635/_.png</picture>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="fdb71cd7-b8bf-48d7-8cca-ee1ddf24783c" available="true">
+        <name>n 12 / silver edition</name>
+        <description>
+Лаконичная серьга из серебра 925 пробы, покрытая родием. Диаметр сережки 25 мм. &lt;br /&gt;Указана стоимость одного изделия.
+</description>
+        <price>12000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>829741702382</categoryId>
+        <url>https://leratreyger.ru/earrings/tproduct/986742011-328412514842-n-12-silver-edition</url>
+        <picture>https://static.tildacdn.com/tild6330-3237-4130-b865-663865363432/-4.png</picture>
+        <picture>https://static.tildacdn.com/tild3930-6165-4638-b261-333234613730/img_9373_1_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6530-3939-4039-a532-333630363631/img_9665__copy.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6634-3933-4566-b238-623931343264/IMG_9645__.jpg</picture>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="5c43d1ed-4313-4da2-ba7d-97c26dda842b" available="true">
+        <name>n 13 / silver edition</name>
+        <description>
+Лаконичный кафф из серебра 925 пробы, покрытый родием. Диаметр изделия 16 мм.
+</description>
+        <price>7000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>638107876352</categoryId>
+        <url>https://leratreyger.ru/cuffs/tproduct/986753266-124227188782-n-13-silver-edition</url>
+        <picture>https://static.tildacdn.com/tild3837-6437-4235-b333-663134363633/-6.png</picture>
+        <picture>https://static.tildacdn.com/tild6162-6234-4662-b165-626335313866/IMG_9645_-2.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6636-6662-4565-a435-303564323166/img_9665__copy.jpg</picture>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="39bb40ba-8711-4ea8-97a5-7f5889f5cb83" available="true">
+        <name>lt x o.rim</name>
+        <description>
+Кожаный шнурок толщиной 2 мм с наконечниками в форме капелек из серебра 925 пробы. Длина 1,2 м.&lt;br /&gt;&lt;br /&gt;Срок изготовления - 3 недели.
+</description>
+        <price>35000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>822851431962</categoryId>
+        <url>https://leratreyger.ru/tproduct/816690270-972177857172-lt-x-orim</url>
+        <picture>https://static.tildacdn.com/tild3033-3835-4639-b532-346538306566/__2_.png</picture>
+        <picture>https://static.tildacdn.com/tild6166-3532-4437-b834-383964633931/IMG_6082_.png</picture>
+        <picture>https://static.tildacdn.com/tild3638-6635-4063-a339-653736343833/IMG_3663_.png</picture>
+        <picture>https://static.tildacdn.com/tild6264-6637-4666-b033-353930393264/IMG_3578__2.png</picture>
+        <param name="Коллекция">lt x o.rim</param>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="6acacd14-a95f-4c7c-93bf-4bc3f48eb39e" available="true">
+        <name>lt x o.rim</name>
+        <description>
+Браслет органической формы из серебра 925 пробы со вставкой из натурального агата на пружинном механизме.&lt;br /&gt;&lt;br /&gt;Срок изготовления - 3 недели.
+</description>
+        <price>110000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>822851431962</categoryId>
+        <url>https://leratreyger.ru/tproduct/816690270-783648190892-lt-x-orim</url>
+        <picture>https://static.tildacdn.com/tild3737-3035-4639-b062-383262613538/IMG_4311_.png</picture>
+        <picture>https://static.tildacdn.com/tild3363-3034-4839-b637-646330396134/IMG_3136__2.png</picture>
+        <picture>https://static.tildacdn.com/tild6163-6564-4461-a537-653035613064/IMG_4299_.png</picture>
+        <picture>https://static.tildacdn.com/tild3238-6265-4233-b361-616335633163/noroot.png</picture>
+        <picture>https://static.tildacdn.com/tild3637-3238-4734-b137-316537663039/IMG_4342_.png</picture>
+        <param name="Коллекция">lt x o.rim</param>
+        <param name="Металл">Серебро</param>
+        <param name="Вставка">Агат</param>
+      </offer>
+      <offer id="a00ac872-0462-4b13-8946-516c3e42812e" available="true">
+        <name>lt x o.rim</name>
+        <description>
+Изящный шнурок толщиной 1 мм с наконечниками из серебра 925 пробы. Длина 1,2 м.&lt;br /&gt;&lt;br /&gt;Срок изготовления - 3 недели.
+</description>
+        <price>15000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>822851431962</categoryId>
+        <url>https://leratreyger.ru/tproduct/816690270-623138343672-lt-x-orim</url>
+        <picture>https://static.tildacdn.com/tild3732-6564-4839-b532-613635666261/__2_.png</picture>
+        <picture>https://static.tildacdn.com/tild3235-6666-4232-b263-643634313637/IMG_3663_.png</picture>
+        <picture>https://static.tildacdn.com/tild3635-3562-4666-b261-663732316439/IMG_3578__2.png</picture>
+        <param name="Коллекция">lt x o.rim</param>
+        <param name="Металл">Серебро</param>
+      </offer>
+      <offer id="bfe2d94b-a62e-431b-b09a-0cd815ab56e8" available="true">
+        <name>Angle</name>
+        <description>
+“INRO” by Artskill Store x Lera Treyger. &lt;br /&gt;Квадратный гребень из рога буйвола от бренда Lera Treyger в черном чехле из натуральной кожи на тонком шнурке от Artskill Store.&lt;br /&gt;Размеры гребня: 6 х 6 см; толщина 6 мм&lt;br /&gt;Размеры чехла: 7.5 х 7.2 см; толщина 3 мм&lt;br /&gt;Шнур: длина 85 см; толщина 0.5 см
+</description>
+        <price>15000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-251432033092-angle</url>
+        <picture>https://static.tildacdn.com/tild3039-6537-4832-b130-346335363035/1__1500.png</picture>
+        <picture>https://static.tildacdn.com/tild6564-6637-4236-a534-316234656335/sasha_6.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3334-6433-4735-a234-646230623730/3.png</picture>
+        <picture>https://static.tildacdn.com/tild3531-6663-4630-a263-393964363231/sasha_10.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6139-6166-4634-b934-396365313739/sasha_5.jpg</picture>
+      </offer>
+      <offer id="fa2c5610-89c1-4dc4-96d3-57c4cbf65246" available="true">
+        <name>Wabi</name>
+        <description>
+Мы назвали каждый гребень в честь определённого состояния человека.&lt;br /&gt;&lt;br /&gt;Wabi / Ваби - отсутствие пафоса, сознательный примитивизм.&lt;br /&gt;&lt;br /&gt;Каждый гребень выполнен вручную из рога буйвола, оттенки и рисунок изделий могут отличаться от фотографий, представленных на сайте.&lt;br /&gt;&lt;br /&gt;Каждый гребень упакован в бархатный мешочек с кистями. &lt;br /&gt;&lt;br /&gt;Размер: 6х6 см
+</description>
+        <price>7200</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-732796639342-wabi</url>
+        <picture>https://static.tildacdn.com/tild3033-6331-4531-b265-326536366536/3.png</picture>
+        <picture>https://static.tildacdn.com/tild6136-6435-4437-b430-343139656339/8.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6631-3734-4836-b565-393034346366/4.png</picture>
+        <param name="Коллекция">Kushibi</param>
+      </offer>
+      <offer id="06450810-13c8-469c-8989-72aa56be2750" available="true">
+        <name>Round</name>
+        <description>
+“INRO” by#nbsp;Artskill Store x Lera Treyger. &lt;br /&gt;Круглый гребень из рога буйвола от бренда Lera Treyger в черном чехле из натуральной кожи на тонком шнурке#nbsp;от Artskill Store.&lt;br /&gt;Размеры гребня: ⌀ 6 см, толщина 6 мм&lt;br /&gt;Размеры чехла: ⌀ 7.3 см; толщина 3 мм&lt;br /&gt;Шнур: длина 85 см; толщина 0.5 см
+</description>
+        <price>15000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-489364721982-round</url>
+        <picture>https://static.tildacdn.com/tild6133-3932-4636-b636-396465613635/2_copy__1500.png</picture>
+      </offer>
+      <offer id="52ff6694-1eb8-4cb5-b3f3-3adab21d2d89" available="true">
+        <name>Round</name>
+        <description>
+“INRO” by Artskill Store x Lera Treyger. &lt;br /&gt;Круглый гребень из рога буйвола от бренда Lera Treyger в молочном чехле из натуральной кожи на тонком шнурке от Artskill Store.&lt;br /&gt;Размеры гребня: ⌀ 6 см, толщина 6 мм&lt;br /&gt;Размеры чехла: ⌀ 7.3 см; толщина 3 мм&lt;br /&gt;Шнур: длина 85 см; толщина 0.5 см
+</description>
+        <price>15000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-168810399392-round</url>
+        <picture>https://static.tildacdn.com/tild6130-6362-4836-b738-396339353234/2__1500.png</picture>
+        <picture>https://static.tildacdn.com/tild3062-3230-4630-b832-393563373466/sasha_7.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3836-3263-4462-b636-636266363864/4.png</picture>
+        <picture>https://static.tildacdn.com/tild3839-3065-4561-a635-386134656662/sasha_11.jpg</picture>
+      </offer>
+      <offer id="069874d7-20fb-40ba-b570-4015a431f598" available="true">
+        <name>Mujō</name>
+        <description>
+Мы назвали каждый гребень в честь определённого состояния человека.&lt;br /&gt;&lt;br /&gt;Mujō / Мудзё - особенное состояние души,#nbsp;когда человек остро ощущает быстротечность времени, хрупкость и#nbsp;изменчивость каждого момента бытия.&lt;br /&gt;&lt;br /&gt;Каждый гребень выполнен вручную из рога буйвола, оттенки и рисунок изделий могут отличаться от фотографий, представленных на сайте.&lt;br /&gt;&lt;br /&gt;Каждый гребень упакован в бархатный мешочек с кистями.
+</description>
+        <price>7200</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-813937601172-muj</url>
+        <picture>https://static.tildacdn.com/tild3039-6238-4932-a561-663934643334/5.png</picture>
+        <picture>https://static.tildacdn.com/tild3363-3237-4835-b734-613633306363/22_.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3936-3133-4938-a436-376338663064/6.png</picture>
+        <param name="Коллекция">Kushibi</param>
+      </offer>
+      <offer id="a1a25f68-500f-4748-81b2-ebd3f6c32b52" available="true">
+        <name>Fueki-ryuko</name>
+        <description>
+Мы назвали каждый гребень в честь определённого состояния человека.&lt;br /&gt;&lt;br /&gt;Fueki-ryuko / Фуэки-рюко#nbsp;— это ощущение постоянства и#nbsp;незыблемости вечного в#nbsp;непрерывно меняющемся мире.&lt;br /&gt;&lt;br /&gt;Каждый гребень выполнен вручную из рога буйвола, оттенки и рисунок изделий могут отличаться от фотографий, представленных на сайте.&lt;br /&gt;&lt;br /&gt;Каждый гребень упакован в бархатный мешочек с кистями. &lt;br /&gt;&lt;br /&gt;Размер: 6х12,5 см
+</description>
+        <price>8000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-596815244452-fueki-ryuko</url>
+        <picture>https://static.tildacdn.com/tild3336-3665-4531-b065-626132323631/1.png</picture>
+        <picture>https://static.tildacdn.com/tild6234-3062-4539-a533-613465646536/17.jpg</picture>
+        <picture>https://static.tildacdn.com/tild6263-6230-4830-a634-653161393566/2.png</picture>
+        <param name="Коллекция">Kushibi</param>
+      </offer>
+      <offer id="cbc1de93-b855-4def-95a3-fb9843d01748" available="true">
+        <name>Shiori</name>
+        <description>
+Мы назвали каждый гребень в честь определённого состояния человека.&lt;br /&gt;&lt;br /&gt;Shiori / Сиори#nbsp;— состояние духовной сосредоточенности, необходимое для постижения глубинного смысла явлений.&lt;br /&gt;&lt;br /&gt;Каждый гребень выполнен вручную из рога буйвола, оттенки и рисунок изделий могут отличаться от фотографий, представленных на сайте.&lt;br /&gt;&lt;br /&gt;Каждый гребень упакован в бархатный мешочек с кистями. &lt;br /&gt;&lt;br /&gt;Размер: 2х11 см
+</description>
+        <price>6500</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-401455841562-shiori</url>
+        <picture>https://static.tildacdn.com/tild3961-6631-4364-a531-343633363236/7.png</picture>
+        <picture>https://static.tildacdn.com/tild3536-6563-4535-b339-323062613961/21.jpg</picture>
+        <picture>https://static.tildacdn.com/tild3435-3339-4531-b936-363065636630/8.png</picture>
+        <param name="Коллекция">Kushibi</param>
+      </offer>
+      <offer id="75207937-43d5-4b47-bf30-d4e541f2b75b" available="true">
+        <name>Kanzashi</name>
+        <description>
+Каждый гребень выполнен вручную из рога буйвола, оттенки и рисунок изделий могут отличаться от фотографий, представленных на сайте.&lt;br /&gt;&lt;br /&gt;Каждый гребень упакован в бархатный мешочек с кистями. &lt;br /&gt;&lt;br /&gt;Размер: 1х15 см
+</description>
+        <price>6000</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-725111285632-kanzashi</url>
+        <picture>https://static.tildacdn.com/tild6435-3630-4437-b934-323732663464/kanzashi.png</picture>
+        <param name="Коллекция">Kushibi</param>
+      </offer>
+      <offer id="9ebcba12-f57d-465f-b24b-4318f9cefe49" available="true">
+        <name>Angle</name>
+        <description>
+“INRO” by#nbsp;Artskill Store x Lera Treyger. &lt;br /&gt;Квадратный гребень из рога буйвола от бренда Lera Treyger в коричневом чехле из натуральной замши на тонком шнурке от Artskill Store.&lt;br /&gt;Размеры гребня: 6 х 6 см; толщина 6 мм&lt;br /&gt;Размеры чехла: 7.5 х 7.2 см; толщина 3 мм&lt;br /&gt;Шнур: длина 85 см; толщина 0.5 см
+</description>
+        <price>13500</price>
+        <oldprice>15000</oldprice>
+        <currencyId>RUR</currencyId>
+        <categoryId>464926535112</categoryId>
+        <url>https://leratreyger.ru/combs-and-accessories/tproduct/986760901-845745994112-angle</url>
+        <picture>https://static.tildacdn.com/tild3334-6365-4139-a636-373639333138/1_copy__1500.png</picture>
+      </offer>
+    </offers>
+  </shop>
+</yml_catalog>

@@ -347,6 +347,9 @@ const FeedEditor = () => {
   const [showUpdateOptionsModal, setShowUpdateOptionsModal] = useState(false);
   const [updateOptions, setUpdateOptions] = useState<UpdateOptions>(defaultUpdateOptions);
   const [showBrandStatsModal, setShowBrandStatsModal] = useState(false);
+  // Состояние для скидок в массовом редактировании
+  const [bulkDiscountPercent, setBulkDiscountPercent] = useState<number | null>(null);
+  const [bulkDiscountMode, setBulkDiscountMode] = useState<'reducePrice' | 'increaseOldPrice'>('reducePrice');
   // Все useEffect/useMemo тоже идут здесь
   useEffect(() => {
     if (currentFeed?.isPublished && currentFeed?.publishedUrl) {
@@ -509,6 +512,7 @@ const FeedEditor = () => {
   };
   
   const handleEditProduct = (productId: string) => {
+    if (!feedId) return;
     navigate(`/feeds/${feedId}/products/${productId}`);
   };
   
@@ -869,19 +873,29 @@ const FeedEditor = () => {
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/></svg>
             </button>
             <div className="p-6">
-              <FeedAISettingsForm 
+              <FeedAISettingsForm
                 feed={currentFeed}
                 onUpdate={(updatedFeed) => {
+                  console.log('Обновление настроек AI для фида:', updatedFeed);
                   if (!updatedFeed.aiSettings) {
-                    alert('Ошибка при сохранении настроек AI. Проверьте консоль для деталей.');
+                    console.error('Ошибка: aiSettings отсутствует в обновленном фиде!');
                     setShowAISettingsModal(false);
                     return;
                   }
-                  updateFeed(feedId!, { 
+                  
+                  // Сохраняем настройки фида
+                  updateFeed(feedId!, {
                     aiSettings: updatedFeed.aiSettings,
                     metadata: updatedFeed.metadata
                   });
+                  
+                  console.log('Настройки AI в обновленном фиде:', updatedFeed.aiSettings);
+                  
+                  // Закрываем модальное окно
                   setShowAISettingsModal(false);
+                  
+                  // Обновляем текущий фид в локальном состоянии
+                  setCurrentFeed(feedId!);
                 }}
                 onCancel={() => setShowAISettingsModal(false)}
               />
@@ -1242,6 +1256,52 @@ const FeedEditor = () => {
     </div>
   );
   
+  // Функция для применения скидки к товару
+  const applyDiscountToProduct = (product: Product, discountPercent: number, mode: 'reducePrice' | 'increaseOldPrice') => {
+    if (!product || discountPercent <= 0) return product;
+    
+    const currentPrice = parseFloat(String(product.price));
+    if (isNaN(currentPrice) || currentPrice <= 0) return product;
+    
+    const updatedProduct = { ...product };
+    
+    if (mode === 'reducePrice') {
+      // Режим 1: Снижаем текущую цену на процент скидки
+      updatedProduct.oldPrice = currentPrice;
+      updatedProduct.price = parseFloat((currentPrice * (1 - discountPercent / 100)).toFixed(2));
+    } else {
+      // Режим 2: Рассчитываем oldPrice так, чтобы при скидке получить текущую цену
+      updatedProduct.price = currentPrice;
+      updatedProduct.oldPrice = parseFloat((currentPrice / (1 - discountPercent / 100)).toFixed(2));
+    }
+    
+    return updatedProduct;
+  };
+  
+  // Функция массового применения скидок к выбранным товарам
+  const handleBulkApplyDiscount = () => {
+    if (selectedProducts.length === 0 || bulkDiscountPercent === null || bulkDiscountPercent <= 0) return;
+    
+    const updatedProducts = currentFeed!.products.map(product => {
+      if (selectedProducts.includes(product.id)) {
+        return applyDiscountToProduct(product, bulkDiscountPercent, bulkDiscountMode);
+      }
+      return product;
+    });
+    
+    // Обновляем фид с новыми ценами
+    updateFeed(feedId!, { ...currentFeed!, products: updatedProducts });
+    
+    // Закрываем модальное окно
+    setShowBulkEditModal(false);
+    setBulkDiscountPercent(null);
+    setBulkAvailability(null);
+    setBulkIncludeInExport(null);
+    
+    // Уведомляем пользователя
+    alert(`Скидка ${bulkDiscountPercent}% применена к ${selectedProducts.length} товарам`);
+  };
+  
   // Модальное окно для массового редактирования
   const renderBulkEditModal = () => {
     if (!showBulkEditModal) return null;
@@ -1317,12 +1377,58 @@ const FeedEditor = () => {
             </div>
           </div>
           
-          <div className="flex justify-end space-x-3">
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-2">Скидка</p>
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  value={bulkDiscountPercent !== null ? bulkDiscountPercent : ''}
+                  onChange={(e) => setBulkDiscountPercent(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="Введите % скидки"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  min="0"
+                  max="99"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    className="h-4 w-4 text-blue-600"
+                    checked={bulkDiscountMode === 'reducePrice'}
+                    onChange={() => setBulkDiscountMode('reducePrice')}
+                  />
+                  <span className="ml-2 text-sm">Снизить текущую цену</span>
+                </label>
+                <p className="text-xs text-gray-500 ml-6">
+                  Текущая цена станет старой ценой, новая цена будет снижена на указанный процент
+                </p>
+                
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    className="h-4 w-4 text-blue-600"
+                    checked={bulkDiscountMode === 'increaseOldPrice'}
+                    onChange={() => setBulkDiscountMode('increaseOldPrice')}
+                  />
+                  <span className="ml-2 text-sm">Рассчитать старую цену</span>
+                </label>
+                <p className="text-xs text-gray-500 ml-6">
+                  Текущая цена останется без изменений, старая цена будет рассчитана с учетом скидки
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap justify-end space-x-3">
             <button
               onClick={() => {
                 setShowBulkEditModal(false);
                 setBulkAvailability(null);
                 setBulkIncludeInExport(null);
+                setBulkDiscountPercent(null);
               }}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
             >
@@ -1332,14 +1438,25 @@ const FeedEditor = () => {
               onClick={handleBulkEdit}
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
             >
-              Применить
+              Применить статусы
+            </button>
+            <button
+              onClick={handleBulkApplyDiscount}
+              disabled={bulkDiscountPercent === null || bulkDiscountPercent <= 0}
+              className={`px-4 py-2 rounded-md text-sm ${
+                bulkDiscountPercent !== null && bulkDiscountPercent > 0
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Применить скидку
             </button>
           </div>
         </div>
       </div>
     );
   };
-
+  
   // Функция для исключения всех выбранных товаров из выгрузки
   const handleExcludeAllSelected = () => {
     if (selectedProducts.length === 0) return;
